@@ -20,10 +20,10 @@ resource "aws_s3_bucket" "main" {
     max_age_seconds = 3000
   }
 
-  tags = {
-    Name        = "cvdsts-prod-website-bucket",
-    Environment = "prod"
-  }
+  tags = merge(local.common_tags, {
+    Name        = "${local.prefix}-website-bucket",
+    Environment = local.environment
+  })
 }
 
 resource "aws_s3_bucket_policy" "main" {
@@ -42,10 +42,9 @@ resource "aws_s3_bucket" "redirect_www" {
     redirect_all_requests_to = "http://${aws_s3_bucket.main.website_endpoint}"
   }
 
-  tags = {
-    Name        = "cvdsts-prod-www-rerouting-bucket",
-    Environment = "prod"
-  }
+  tags = merge(local.common_tags, {
+    Name        = "${local.prefix}-www-rerouting-bucket",
+  })
 }
 
 resource "aws_s3_bucket_public_access_block" "redirect_www" {
