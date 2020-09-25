@@ -1,6 +1,6 @@
 import moment from 'moment';
 import React from 'react';
-import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from 'recharts';
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Stats } from './api';
 
 
@@ -8,19 +8,19 @@ const StatsGraph = ({ stats }: { stats: Stats[] }) => {
   const movingAverage = calcMovingAverage(stats, 7)
   const data = stats.map((s, i) => ({ ...s, "date": s.date.toDate().getTime(), newCasesMvgAvg: movingAverage[i] }))
   return (
-    <LineChart
-      width={1000}
-      height={600}
-      data={data}
-    // margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-    >
-      <CartesianGrid strokeDasharray="3 3" />
-      <XAxis dataKey="date" type="number" domain={['dataMin', 'dataMax']} tickFormatter={tickFormatter} />
-      <YAxis />
-      <Tooltip labelFormatter={(unixTime) => moment(unixTime).format('YYYY-MM-DD')} />
-      <Line type="monotone" dataKey="newCases" stroke="#8884d8" dot={false} />
-      <Line type="monotone" dataKey="newCasesMvgAvg" stroke="#1c074a" dot={false} />
-    </LineChart>
+    <ResponsiveContainer width="100%" height={600}>
+      <LineChart
+        data={data}
+        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="date" type="number" domain={['dataMin', 'dataMax']} tickFormatter={tickFormatter} />
+        <YAxis />
+        <Tooltip labelFormatter={(unixTime) => moment(unixTime).format('YYYY-MM-DD')} />
+        <Line type="monotone" dataKey="newCases" stroke="#8884d8" dot={false} />
+        <Line type="monotone" dataKey="newCasesMvgAvg" stroke="#1c074a" dot={false} />
+      </LineChart>
+    </ResponsiveContainer>
   )
 
 }
