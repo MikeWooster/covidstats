@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getStats, Stats } from './api';
-import StatsGraph from './StatsGraph';
+import StatsComponent from './StatsComponent';
 
 
 const StatsContainer = () => {
@@ -10,7 +10,7 @@ const StatsContainer = () => {
     getStats().then(s => setStats(s))
   }, []);
 
-  return <StatsGraph stats={stats} />
+  return <StatsComponent stats={stats} />
 }
 
 export default StatsContainer
