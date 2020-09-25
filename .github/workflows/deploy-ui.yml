@@ -1,0 +1,36 @@
+on:
+  push:
+    paths:
+      - "application/ui/**"
+    branches:
+      - master
+
+defaults:
+  run:
+    working-directory: application/ui
+
+jobs:
+  deploy:
+    name: Deploy branch to production
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repository under $GITHUB_WORKSPACE
+        uses: actions/checkout@v2
+      - name: using node.js to build project
+        uses: actions/setup-node@v1
+        with:
+          node-version: 13
+      - name: Install dependencies and build
+        run: |
+          yarn install
+          yarn test
+          yarn build
+      - name: Create aws credentials
+        run: |
+          mkdir ~/.aws
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
+      - name: Deploy app
+        run: aws s3 sync --acl=public-read build/ s3://covidstats.uk
