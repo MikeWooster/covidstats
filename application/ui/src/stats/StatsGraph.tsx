@@ -1,8 +1,6 @@
 import moment from 'moment';
 import React from 'react';
 import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from 'recharts';
-import Container from 'semantic-ui-react/dist/commonjs/elements/Container/Container';
-import Header from 'semantic-ui-react/dist/commonjs/elements/Header/Header';
 import { Stats } from './api';
 
 
@@ -10,22 +8,19 @@ const StatsGraph = ({ stats }: { stats: Stats[] }) => {
   const movingAverage = calcMovingAverage(stats, 7)
   const data = stats.map((s, i) => ({ ...s, "date": s.date.toDate().getTime(), newCasesMvgAvg: movingAverage[i] }))
   return (
-    <Container>
-      <Header as='h1'>Covid Stats UK</Header>
-      <LineChart
-        width={800}
-        height={600}
-        data={data}
-        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="date" type="number" domain={['dataMin', 'dataMax']} tickFormatter={tickFormatter} />
-        <YAxis />
-        <Tooltip labelFormatter={(unixTime) => moment(unixTime).format('YYYY-MM-DD')} />
-        <Line type="monotone" dataKey="newCases" stroke="#8884d8" dot={false} />
-        <Line type="monotone" dataKey="newCasesMvgAvg" stroke="#5e4cf0de" dot={false} />
-      </LineChart>
-    </Container>
+    <LineChart
+      width={1000}
+      height={600}
+      data={data}
+    // margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+    >
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey="date" type="number" domain={['dataMin', 'dataMax']} tickFormatter={tickFormatter} />
+      <YAxis />
+      <Tooltip labelFormatter={(unixTime) => moment(unixTime).format('YYYY-MM-DD')} />
+      <Line type="monotone" dataKey="newCases" stroke="#8884d8" dot={false} />
+      <Line type="monotone" dataKey="newCasesMvgAvg" stroke="#1c074a" dot={false} />
+    </LineChart>
   )
 
 }
@@ -36,7 +31,7 @@ const tickFormatter = (unixTime: number): string => {
 
 const calcMovingAverage = (stats: Stats[], days: number): number[] => {
   const movingAverage = []
-  const windowR = days // 2
+  const windowR = days / 2
   for (let i = 0; i < stats.length; i++) {
     const stat = stats[i]
     const minDate = stat.date.clone().subtract(windowR, "d")

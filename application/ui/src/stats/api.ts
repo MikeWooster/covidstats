@@ -29,10 +29,19 @@ interface StatsResponse {
   },
 }
 
+// // Get for regional data:
+// export const getStats = async (): Promise<Stats[]> => {
+//   const page = await getPage('https://api.coronavirus.data.gov.uk/v1/data?filters=areaType=region;areaName=South East&structure={"date":"date","areaName":"areaName","newCases":"newCasesBySpecimenDate","newCasesRate":"cumCasesBySpecimenDateRate","newDeaths":"newDeaths28DaysByDeathDate"}')
+//   const formatted = page.data.map(s => ({ ...s, date: moment(s.date, "YYYY-MM-DD") })).filter(s => s.date <= moment().startOf("day"))
+//   return formatted.sort((a, b) => (a.date.isBefore(b.date) ? -1 : 1))
+// }
+
+// Get for overview data
 export const getStats = async (): Promise<Stats[]> => {
-  const page = await getPage('https://api.coronavirus.data.gov.uk/v1/data?filters=areaType=region;areaName=South East&structure={"date":"date","areaName":"areaName","newCases":"newCasesBySpecimenDate","newCasesRate":"cumCasesBySpecimenDateRate","newDeaths":"newDeaths28DaysByDeathDate"}')
+  const page = await getPage('https://api.coronavirus.data.gov.uk/v1/data?filters=areaType=overview&structure={"date":"date","areaName":"areaName","newCases":"newCasesBySpecimenDate","newCasesRate":"cumCasesBySpecimenDateRate","newDeaths":"newDeaths28DaysByDeathDate"}')
   const formatted = page.data.map(s => ({ ...s, date: moment(s.date, "YYYY-MM-DD") })).filter(s => s.date <= moment().startOf("day"))
   return formatted.sort((a, b) => (a.date.isBefore(b.date) ? -1 : 1))
+
 }
 
 const getPage = async (url: string): Promise<StatsResponse> => {
