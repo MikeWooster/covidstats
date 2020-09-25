@@ -39,7 +39,7 @@ resource "aws_s3_bucket" "redirect_www" {
   acl    = "private"
 
   website {
-    redirect_all_requests_to = "http://${aws_s3_bucket.main.website_endpoint}"
+    redirect_all_requests_to = "http://${aws_s3_bucket.main.bucket}"
   }
 
   tags = merge(local.common_tags, {

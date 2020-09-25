@@ -22,12 +22,12 @@ resource "aws_route53_record" "covidstats_main" {
 
   alias {
     evaluate_target_health = false
-    name = data.terraform_remote_state.s3.outputs.website_endpoint
+    name = data.terraform_remote_state.s3.outputs.website_domain
     zone_id = data.terraform_remote_state.s3.outputs.website_hosted_zone_id
   }
 }
 
-# Allow routing to the www website bucket.
+# Redirect from www to non-www site.
 resource "aws_route53_record" "covidstats_www_redirect" {
   name = "www.covidstats.uk"
   type = "A"
@@ -35,7 +35,7 @@ resource "aws_route53_record" "covidstats_www_redirect" {
 
   alias {
     evaluate_target_health = false
-    name = data.terraform_remote_state.s3.outputs.redirect_www_website_endpoint
+    name = data.terraform_remote_state.s3.outputs.redirect_www_website_domain
     zone_id = data.terraform_remote_state.s3.outputs.redirect_www_website_hosted_zone_id
   }
 }
