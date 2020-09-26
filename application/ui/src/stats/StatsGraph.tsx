@@ -1,7 +1,7 @@
 import moment from 'moment';
 import React from 'react';
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { Stats } from './api';
+import { Stats } from './stats';
 
 
 const StatsGraph = ({ stats }: { stats: Stats[] }) => {
