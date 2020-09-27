@@ -1,119 +1,242 @@
-import React from 'react';
-import { Container, Divider, Dropdown, Header, Segment } from 'semantic-ui-react';
-import { AreaTypes, Stats } from './stats';
-import StatsGraph from './StatsGraph';
+import React from "react";
+import {
+  Container,
+  Divider,
+  Dropdown,
+  Header,
+  Input,
+  Segment,
+} from "semantic-ui-react";
+import { AreaTypes } from "./stats";
 
 interface OptionsType {
-  key: string
-  value: string
-  text: string
+  key: string;
+  value: string;
+  text: string;
 }
 
-const StatsComponent = (
-  {
-    err,
-    stats,
-    nations,
-    regions,
-    areaType,
-    setAreaType,
-    refinedArea,
-    setRefinedArea
-  }: {
-    err: string,
-    stats: Stats[],
-    nations: string[],
-    regions: string[],
-    areaType: AreaTypes,
-    setAreaType: (v: AreaTypes) => void,
-    refinedArea: string,
-    setRefinedArea: (v: string) => void
-  }
-) => {
+const StatsComponent = ({
+  areaOptions,
+  searchRefinement,
+  graph,
+  err,
+}: {
+  areaOptions: React.ReactElement;
+  searchRefinement: React.ReactElement;
+  graph: React.ReactElement;
+  err: React.ReactElement | null;
+}) => {
   return (
     <Container>
-      <Header as='h1' textAlign={"center"}>Covid Stats UK</Header>
+      <Header as="h1" textAlign={"center"}>
+        Covid Stats UK
+      </Header>
       <Segment basic>
-        <AreaOptionsSelect areaType={areaType} setAreaType={setAreaType} />
-        <AreaRefinementSelect nations={nations} regions={regions} areaType={areaType} refinedArea={refinedArea} setRefinedArea={setRefinedArea} />
-        {err && <Segment inverted color='red' tertiary>Something Went Wrong</Segment>}
+        {areaOptions}
+        {searchRefinement}
+        {err && err}
       </Segment>
       <Divider horizontal />
-      <StatsGraph stats={stats} />
+      {graph}
     </Container>
-  )
-}
+  );
+};
 
-const AreaOptionsSelect = ({ areaType, setAreaType }: { areaType: AreaTypes, setAreaType: (v: AreaTypes) => void }) => {
+export const AreaOptionsSelect = ({
+  nations,
+  regions,
+  areaType,
+  setAreaType,
+  setRefinedArea,
+  getStats,
+}: {
+  nations: string[];
+  regions: string[];
+  areaType: AreaTypes;
+  setAreaType: (v: AreaTypes) => void;
+  setRefinedArea: (v: string) => void;
+  getStats: (a: AreaTypes, r: string) => void;
+}) => {
   const areaOptions = [
     {
       key: AreaTypes.overview,
-      text: 'All UK',
+      text: "All UK",
       value: AreaTypes.overview,
     },
     {
       key: AreaTypes.nation,
-      text: 'Nation',
+      text: "Nation",
       value: AreaTypes.nation,
     },
     {
       key: AreaTypes.region,
-      text: 'Region',
+      text: "Region",
       value: AreaTypes.region,
     },
-  ]
+    {
+      key: AreaTypes.postCode,
+      text: "Near You",
+      value: AreaTypes.postCode,
+    },
+  ];
   return (
     <div>
-      Display data for {" "}
+      Display data for{" "}
       <Dropdown
         inline
         options={areaOptions}
-        onChange={(e, { value }) => setAreaType(value as AreaTypes)}
+        onChange={(e, { value }) => {
+          setAreaType(value as AreaTypes);
+          switch (value) {
+            case AreaTypes.overview:
+              getStats(value, "");
+              break;
+            case AreaTypes.nation:
+              const defaultNation = nations[0];
+              setRefinedArea(defaultNation);
+              getStats(value, defaultNation);
+              break;
+            case AreaTypes.region:
+              const defaultRegion = regions[0];
+              setRefinedArea(defaultRegion);
+              getStats(value, defaultRegion);
+              break;
+            case AreaTypes.postCode:
+              setRefinedArea("");
+              break;
+          }
+        }}
         value={areaType}
       />
     </div>
-  )
-}
+  );
+};
 
-const AreaRefinementSelect = (
-  {
-    nations,
-    regions,
-    areaType,
-    refinedArea,
-    setRefinedArea
-  }: {
-    nations: string[],
-    regions: string[],
-    areaType: AreaTypes,
-    refinedArea: string,
-    setRefinedArea: (v: string) => void
-  }
-) => {
-  let searchOptions: OptionsType[] = []
-  let disabled = false
+export const AreaRefinementSearch = ({
+  nations,
+  regions,
+  areaType,
+  refinedArea,
+  setRefinedArea,
+  getStats,
+}: {
+  nations: string[];
+  regions: string[];
+  areaType: AreaTypes;
+  refinedArea: string;
+  setRefinedArea: (v: string) => void;
+  getStats: (a: AreaTypes, r: string) => void;
+}) => {
+  let searchOptions: OptionsType[] = [];
+  let disabled = false;
 
   switch (areaType) {
     case AreaTypes.overview:
-      disabled = true
-      break
+      disabled = true;
+      break;
     case AreaTypes.nation:
-      searchOptions = nations.map(nation => ({ key: nation, text: nation, value: nation }))
-      break
+      searchOptions = nations.map((nation) => ({
+        key: nation,
+        text: nation,
+        value: nation,
+      }));
+      break;
     case AreaTypes.region:
-      searchOptions = regions.map(region => ({ key: region, text: region, value: region }))
-      break
+      searchOptions = regions.map((region) => ({
+        key: region,
+        text: region,
+        value: region,
+      }));
+      break;
   }
 
-  const searchInput = <Dropdown
-    inline
-    search
-    disabled={disabled}
-    options={searchOptions}
-    onChange={(e, { value }) => setRefinedArea(value as string)}
-    value={refinedArea}
-  />
-  return <div>Refine results: {searchInput}</div>
-}
+  const searchInput = (
+    <Dropdown
+      inline
+      search
+      disabled={disabled}
+      options={searchOptions}
+      onChange={(e, { value }) => {
+        const selected = value as string;
+        setRefinedArea(selected);
+        getStats(areaType, selected);
+      }}
+      value={refinedArea}
+    />
+  );
+  return <div>Refine results: {searchInput}</div>;
+};
 
-export default StatsComponent
+export const PostCodeSearch = ({
+  postCode,
+  setRefinedArea,
+  searchRadius,
+  setSearchRadius,
+  getStatsForPostCode,
+  searchTimeout,
+  loading,
+}: {
+  postCode: string;
+  setRefinedArea: (v: string) => void;
+  searchRadius: number | null;
+  setSearchRadius: (v: number | null) => void;
+  getStatsForPostCode: (p: string, r: number) => void;
+  searchTimeout: React.MutableRefObject<NodeJS.Timeout | undefined>;
+  loading: boolean;
+}) => {
+  return (
+    <div>
+      Enter Post Code:{" "}
+      <Input
+        size={"mini"}
+        loading={loading}
+        disabled={loading}
+        value={postCode}
+        onChange={(e, { value }) => {
+          const postCode = value as string;
+          setRefinedArea(postCode);
+          // When the search query changes, cancel any pending
+          // search requests
+          if (searchTimeout.current !== undefined) {
+            clearTimeout(searchTimeout.current);
+          }
+          // Only perform a search when the user stops typing for 750 ms
+          searchTimeout.current = setTimeout(() => {
+            const r = searchRadius === null ? 0 : searchRadius;
+            getStatsForPostCode(postCode, r);
+          }, 750);
+        }}
+      />{" "}
+      Within{" "}
+      <Input
+        size={"mini"}
+        loading={loading}
+        disabled={loading}
+        value={searchRadius === null ? "" : searchRadius}
+        onChange={(e, { value }) => {
+          if (value === "") {
+            setSearchRadius(null);
+            return;
+          }
+          const r = parseInt(value);
+          if (isNaN(r)) {
+            return;
+          }
+          setSearchRadius(r);
+          // When the search query changes, cancel any pending
+          // search requests
+          if (searchTimeout.current !== undefined) {
+            clearTimeout(searchTimeout.current);
+          }
+          // Only perform a search when the user stops typing for 750 ms
+          searchTimeout.current = setTimeout(() => {
+            getStatsForPostCode(postCode, r);
+          }, 500);
+        }}
+      />{" "}
+      Kilometers
+    </div>
+  );
+};
+
+export default StatsComponent;
