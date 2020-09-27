@@ -1,56 +1,118 @@
-import React, { useEffect, useState } from 'react';
-import { useUnsafeEffect } from '../hooks';
-import { AreaTypes, getNations, getRegions, getStats, Stats } from './stats';
-import StatsComponent from './StatsComponent';
+import React, { useEffect, useRef, useState } from "react";
+import { Segment } from "semantic-ui-react";
+import {
+  AreaTypes,
+  getNations,
+  getRegions,
+  getStats,
+  getStatsForPostCode,
+  Stats,
+} from "./stats";
+import StatsComponent, {
+  AreaOptionsSelect,
+  AreaRefinementSearch,
+  PostCodeSearch,
+} from "./StatsComponent";
+import StatsGraph from "./StatsGraph";
 
 const StatsContainer = () => {
-  const [stats, setStats] = useState<Stats[]>([])
-  const [areaType, setAreaType] = useState(AreaTypes.overview)
-  const [refinedArea, setRefinedArea] = useState("")
-  const [err, setErr] = useState("")
-  const [nations, setNations] = useState<string[]>([])
-  const [regions, setRegions] = useState<string[]>([])
+  const [loading, setLoading] = useState(false);
+  const [stats, setStats] = useState<Stats[]>([]);
+  const [areaType, setAreaType] = useState(AreaTypes.overview);
+  const [refinedArea, setRefinedArea] = useState("");
+  const [searchRadius, setSearchRadius] = useState<number | null>(25);
 
-  useUnsafeEffect(() => {
-    getNations()
-      .then(n => setNations(n))
-      .catch(err => setErr(err))
-    getRegions()
-      .then(r => setRegions(r))
-      .catch(err => setErr(err))
-  }, [])
+  const [err, setErr] = useState<Error | null>(null);
+  const [nations, setNations] = useState<string[]>([]);
+  const [regions, setRegions] = useState<string[]>([]);
 
-  // Make sure a refined area is selected when the area type changes
-  useEffect(() => {
-    switch (areaType) {
-      case AreaTypes.overview:
-        setRefinedArea("")
-        break;
-      case AreaTypes.nation:
-        setRefinedArea(nations.length > 0 ? nations[0] : "")
-        break;
-      case AreaTypes.region:
-        setRefinedArea(regions.length > 0 ? regions[0] : "")
-        break;
-    }
-  }, [areaType, nations, regions])
+  const postCodeSearchTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
 
-  useUnsafeEffect(() => {
+  const getAndSetStats = (areaType: AreaTypes, refinedArea: string) => {
+    setLoading(true);
+    setErr(null);
     getStats(areaType, refinedArea)
-      .then(s => setStats(s))
-      .catch(err => setErr(err))
-  }, [refinedArea]);
+      .then((stats) => {
+        setLoading(false);
+        setStats(stats);
+      })
+      .catch((err) => {
+        setErr(err);
+        setLoading(false);
+      });
+  };
 
-  return <StatsComponent
-    err={err}
-    nations={nations}
-    regions={regions}
-    stats={stats}
-    areaType={areaType}
-    setAreaType={(v: AreaTypes) => setAreaType(v)}
-    refinedArea={refinedArea}
-    setRefinedArea={(v: string) => setRefinedArea(v)}
-  />
-}
+  const getAndSetStatsForPostCode = (postCode: string, radius: number) => {
+    setErr(null);
+    if (postCode === "") {
+      return;
+    }
+    setLoading(true);
+    getStatsForPostCode(postCode, radius)
+      .then((stats) => {
+        setLoading(false);
+        setStats(stats);
+      })
+      .catch((err) => {
+        setErr(err);
+        setLoading(false);
+      });
+  };
 
-export default StatsContainer
+  const errComponent = err ? (
+    <Segment inverted color="red" tertiary>
+      {err.message}
+    </Segment>
+  ) : null;
+
+  useEffect(() => {
+    getAndSetStats(AreaTypes.overview, "");
+    getNations().then((nations) => setNations(nations));
+    getRegions().then((regions) => setRegions(regions));
+  }, []);
+
+  const areaOptionsComponent = (
+    <AreaOptionsSelect
+      areaType={areaType}
+      setAreaType={setAreaType}
+      getStats={getAndSetStats}
+      nations={nations}
+      regions={regions}
+      setRefinedArea={setRefinedArea}
+    />
+  );
+  const searchRefinementComponent =
+    areaType === AreaTypes.postCode ? (
+      <PostCodeSearch
+        postCode={refinedArea}
+        setRefinedArea={setRefinedArea}
+        searchRadius={searchRadius}
+        setSearchRadius={setSearchRadius}
+        getStatsForPostCode={getAndSetStatsForPostCode}
+        searchTimeout={postCodeSearchTimeout}
+        loading={loading}
+      />
+    ) : (
+      <AreaRefinementSearch
+        nations={nations}
+        regions={regions}
+        areaType={areaType}
+        refinedArea={refinedArea}
+        setRefinedArea={setRefinedArea}
+        getStats={getAndSetStats}
+      />
+    );
+
+  const graph = <StatsGraph stats={stats} />;
+
+  return (
+    <StatsComponent
+      areaOptions={areaOptionsComponent}
+      searchRefinement={searchRefinementComponent}
+      graph={graph}
+      err={errComponent}
+    />
+  );
+};
+
+export default StatsContainer;
