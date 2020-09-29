@@ -2,6 +2,7 @@ import moment from "moment";
 import React from "react";
 import {
   CartesianGrid,
+  Legend,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -31,15 +32,48 @@ const StatsGraph = ({ stats }: { stats: Stats[] }) => {
           domain={["dataMin", "dataMax"]}
           tickFormatter={tickFormatter}
         />
-        <YAxis />
+        <YAxis
+          yAxisId="left"
+          label={{
+            value: "Cases",
+            position: "insideLeft",
+            angle: -90,
+            dy: -20,
+          }}
+        />
+        <YAxis
+          yAxisId="right"
+          orientation="right"
+          label={{
+            value: "Deaths",
+            position: "insideRight",
+            angle: 90,
+            dy: -20,
+          }}
+        />
         <Tooltip
           labelFormatter={(unixTime) => moment(unixTime).format("YYYY-MM-DD")}
         />
-        <Line type="monotone" dataKey="newCases" stroke="#8884d8" dot={false} />
+        <Legend />
         <Line
+          yAxisId="left"
+          type="monotone"
+          dataKey="newCases"
+          stroke="#8884d8"
+          dot={false}
+        />
+        <Line
+          yAxisId="left"
           type="monotone"
           dataKey="newCasesMvgAvg"
           stroke="#1c074a"
+          dot={false}
+        />
+        <Line
+          yAxisId="right"
+          type="monotone"
+          dataKey="newDeaths"
+          stroke="#dc0000de"
           dot={false}
         />
       </LineChart>

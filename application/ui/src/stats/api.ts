@@ -12,7 +12,8 @@ export interface StatsDataResponse {
   date: string;
   newCases: number;
   newCasesRate: number;
-  newDeaths: number | null;
+  newDeaths28DaysByPublishDate: number | null;
+  newDeaths28DaysByDeathDate: number | null;
 }
 interface StatsResponse {
   data: StatsDataResponse[];
@@ -86,7 +87,8 @@ const buildURL = (filters: { [key: string]: string }): string => {
     areaCode: "areaCode",
     newCases: "newCasesBySpecimenDate",
     newCasesRate: "cumCasesBySpecimenDateRate",
-    newDeaths: "newDeaths28DaysByDeathDate",
+    newDeaths28DaysByPublishDate: "newDeaths28DaysByPublishDate",
+    newDeaths28DaysByDeathDate: "newDeaths28DaysByDeathDate",
   };
   const params = encodeParams({
     filters: encodeFilters(filters),
