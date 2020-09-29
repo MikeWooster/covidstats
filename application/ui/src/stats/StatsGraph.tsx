@@ -12,7 +12,13 @@ import {
 } from "recharts";
 import { Stats } from "./stats";
 
-const StatsGraph = ({ stats }: { stats: Stats[] }) => {
+const StatsGraph = ({
+  stats,
+  displayDeaths,
+}: {
+  stats: Stats[];
+  displayDeaths: boolean;
+}) => {
   const movingAverage = calcMovingAverage(stats, 7);
   const data = stats.map((s, i) => ({
     ...s,
@@ -41,16 +47,18 @@ const StatsGraph = ({ stats }: { stats: Stats[] }) => {
             dy: -20,
           }}
         />
-        <YAxis
-          yAxisId="right"
-          orientation="right"
-          label={{
-            value: "Deaths",
-            position: "insideRight",
-            angle: 90,
-            dy: -20,
-          }}
-        />
+        {displayDeaths && (
+          <YAxis
+            yAxisId="right"
+            orientation="right"
+            label={{
+              value: "Deaths",
+              position: "insideRight",
+              angle: 90,
+              dy: -20,
+            }}
+          />
+        )}
         <Tooltip
           labelFormatter={(unixTime) => moment(unixTime).format("YYYY-MM-DD")}
         />
@@ -69,13 +77,15 @@ const StatsGraph = ({ stats }: { stats: Stats[] }) => {
           stroke="#1c074a"
           dot={false}
         />
-        <Line
-          yAxisId="right"
-          type="monotone"
-          dataKey="newDeaths"
-          stroke="#dc0000de"
-          dot={false}
-        />
+        {displayDeaths && (
+          <Line
+            yAxisId="right"
+            type="monotone"
+            dataKey="newDeaths"
+            stroke="#dc0000de"
+            dot={false}
+          />
+        )}
       </LineChart>
     </ResponsiveContainer>
   );
