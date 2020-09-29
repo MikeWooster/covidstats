@@ -103,7 +103,9 @@ const StatsContainer = () => {
       />
     );
 
-  const graph = <StatsGraph stats={stats} />;
+  const graph = (
+    <StatsGraph stats={stats} displayDeaths={areaType !== AreaTypes.postCode} />
+  );
 
   return (
     <StatsComponent

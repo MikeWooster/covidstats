@@ -70,9 +70,9 @@ const formatStats = (stats: StatsDataResponse[]): Stats[] => {
       ...s,
       date: moment(s.date, "YYYY-MM-DD"),
       newDeaths:
-        s.newDeaths28DaysByPublishDate === null
+        s.newDeaths28DaysByDeathDate === null
           ? 0
-          : s.newDeaths28DaysByPublishDate,
+          : s.newDeaths28DaysByDeathDate,
     }))
     .filter((s) => s.date <= moment().startOf("day"))
     .sort((a, b) => (a.date.isBefore(b.date) ? -1 : 1));
@@ -88,9 +88,14 @@ const aggregated = (stats: StatsDataResponse[]): StatsDataResponse[] => {
       aggregator[stat.date].newCases += stat.newCases;
 
       // New deaths can be reported as null - convert this to zero
-      const newDeaths = aggregator[stat.date].newDeaths28DaysByPublishDate;
       aggregator[stat.date].newDeaths28DaysByPublishDate =
-        nullToZero(newDeaths) + nullToZero(stat.newDeaths28DaysByPublishDate);
+        nullToZero(aggregator[stat.date].newDeaths28DaysByPublishDate) +
+        nullToZero(stat.newDeaths28DaysByPublishDate);
+
+      aggregator[stat.date].newDeaths28DaysByDeathDate =
+        nullToZero(aggregator[stat.date].newDeaths28DaysByDeathDate) +
+        nullToZero(stat.newDeaths28DaysByDeathDate);
+
       // aggregator[stat.newCasesRate].newCasesRate =
       //   (aggregator[stat.newCasesRate].newCasesRate + stat.newCasesRate) / 2;
     } else {
