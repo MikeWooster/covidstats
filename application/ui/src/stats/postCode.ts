@@ -34,7 +34,7 @@ export const geocodePostCode = async (
   if (postCode in cache) {
     response = cache[postCode];
   } else {
-    const url = `http://api.getthedata.com/postcode/${encodeURIComponent(
+    const url = `https://api.getthedata.com/postcode/${encodeURIComponent(
       postCode
     )}`;
     response = (await fetch(url)
