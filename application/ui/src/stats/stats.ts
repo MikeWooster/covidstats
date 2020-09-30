@@ -19,6 +19,7 @@ export interface Stats {
   date: Moment;
   newCases: number;
   newDeaths: number;
+  newTests: number | null;
 }
 
 export const getNations = async (): Promise<string[]> => {
@@ -67,12 +68,10 @@ export const getStatsForPostCode = async (
 const formatStats = (stats: StatsDataResponse[]): Stats[] => {
   return aggregated(stats)
     .map((s) => ({
-      ...s,
       date: moment(s.date, "YYYY-MM-DD"),
-      newDeaths:
-        s.newDeaths28DaysByDeathDate === null
-          ? 0
-          : s.newDeaths28DaysByDeathDate,
+      newCases: s.newCasesBySpecimenDate,
+      newDeaths: nullToZero(s.newDeaths28DaysByDeathDate),
+      newTests: s.newPCRTestsByPublishDate,
     }))
     .filter((s) => s.date <= moment().startOf("day"))
     .sort((a, b) => (a.date.isBefore(b.date) ? -1 : 1));
@@ -85,19 +84,24 @@ const aggregated = (stats: StatsDataResponse[]): StatsDataResponse[] => {
   for (let i = 0; i < stats.length; i++) {
     const stat = stats[i];
     if (stat.date in aggregator) {
-      aggregator[stat.date].newCases += stat.newCases;
+      aggregator[stat.date].newCasesBySpecimenDate +=
+        stat.newCasesBySpecimenDate;
 
       // New deaths can be reported as null - convert this to zero
-      aggregator[stat.date].newDeaths28DaysByPublishDate =
-        nullToZero(aggregator[stat.date].newDeaths28DaysByPublishDate) +
-        nullToZero(stat.newDeaths28DaysByPublishDate);
+      aggregator[stat.date].newDeaths28DaysByPublishDate = sumVals(
+        aggregator[stat.date].newDeaths28DaysByPublishDate,
+        stat.newDeaths28DaysByPublishDate
+      );
 
-      aggregator[stat.date].newDeaths28DaysByDeathDate =
-        nullToZero(aggregator[stat.date].newDeaths28DaysByDeathDate) +
-        nullToZero(stat.newDeaths28DaysByDeathDate);
+      aggregator[stat.date].newDeaths28DaysByDeathDate = sumVals(
+        aggregator[stat.date].newDeaths28DaysByDeathDate,
+        stat.newDeaths28DaysByDeathDate
+      );
 
-      // aggregator[stat.newCasesRate].newCasesRate =
-      //   (aggregator[stat.newCasesRate].newCasesRate + stat.newCasesRate) / 2;
+      aggregator[stat.date].newPCRTestsByPublishDate = sumVals(
+        aggregator[stat.date].newPCRTestsByPublishDate,
+        stat.newPCRTestsByPublishDate
+      );
     } else {
       aggregator[stat.date] = {
         ...stat,
@@ -112,4 +116,17 @@ const aggregated = (stats: StatsDataResponse[]): StatsDataResponse[] => {
 
 const nullToZero = (v: number | null): number => {
   return v === null ? 0 : v;
+};
+
+const sumVals = (a: number | null, b: number | null): number | null => {
+  if (a === null && b === null) {
+    return null;
+  }
+  if (a === null) {
+    return b;
+  }
+  if (b === null) {
+    return a;
+  }
+  return a + b;
 };
