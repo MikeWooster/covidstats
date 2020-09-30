@@ -1,7 +1,7 @@
 import { AreaTypes } from "./stats";
 
 // Simple cache to save repeated lookups.
-const cache: { [key: string]: StatsDataResponse[] } = {};
+const cache: { [key: string]: StatsResponse } = {};
 
 const base_url = "https://api.coronavirus.data.gov.uk";
 
@@ -65,16 +65,10 @@ export const fetchStatsForLTLAs = async (
     }
   };
   for (let i = 0; i < codes.length; i++) {
-    const code = codes[i];
-    if (code in cache) {
-      extendStats(cache[code]);
-    } else {
-      const newStats = await paginate(
-        buildURL({ areaType: "ltla", areaCode: code })
-      );
-      extendStats(newStats);
-      cache[code] = newStats;
-    }
+    const newStats = await paginate(
+      buildURL({ areaType: "ltla", areaCode: codes[i] })
+    );
+    extendStats(newStats);
   }
   return stats;
 };
@@ -142,7 +136,10 @@ const paginate = async (url: string): Promise<StatsDataResponse[]> => {
 };
 
 const getPage = async (url: string): Promise<StatsResponse> => {
-  return fetch(url).then((response) => {
+  if (url in cache) {
+    return cache[url];
+  }
+  const data = await fetch(url).then((response) => {
     if (response.status === 429) {
       throw new Error(
         "It looks like we have made too many requests to get data - please wait a minute before retrying."
@@ -168,4 +165,6 @@ const getPage = async (url: string): Promise<StatsResponse> => {
     }
     return response.json();
   });
+  cache[url] = data;
+  return data;
 };
