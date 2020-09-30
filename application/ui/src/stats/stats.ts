@@ -5,9 +5,9 @@ import {
   fetchStats,
   fetchStatsForLTLAs,
   StatsDataResponse,
-} from "./api";
+} from "./statsAPI";
 import { getNeighbouringLAs } from "./geo";
-import { geocodePostCode } from "./postCode";
+import { geocodePostCode } from "./postCodeAPI";
 
 export enum AreaTypes {
   overview = "overview",
