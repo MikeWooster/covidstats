@@ -12,18 +12,24 @@ import {
 } from "recharts";
 import { Stats } from "./stats";
 
-const StatsGraph = ({
-  stats,
-  displayDeaths,
-}: {
+interface props {
   stats: Stats[];
   displayDeaths: boolean;
+  applyWeighting: boolean;
+}
+
+const StatsGraph: React.FC<props> = ({
+  stats,
+  displayDeaths,
+  applyWeighting,
 }) => {
   const movingAverage = calcMovingAverage(stats, 7);
+  const maxTests = getMaxTests(stats);
   const data = stats.map((s, i) => ({
     ...s,
     date: s.date.toDate().getTime(),
     newCasesMvgAvg: movingAverage[i],
+    weightedStats: calcWeightedStats(s, maxTests),
   }));
   return (
     <ResponsiveContainer width="100%" height={600}>
@@ -69,6 +75,7 @@ const StatsGraph = ({
           dataKey="newCases"
           stroke="#8884d8"
           dot={false}
+          name="New Cases"
         />
         <Line
           yAxisId="left"
@@ -76,6 +83,7 @@ const StatsGraph = ({
           dataKey="newCasesMvgAvg"
           stroke="#1c074a"
           dot={false}
+          name="New Cases (moving average)"
         />
         {displayDeaths && (
           <Line
@@ -84,6 +92,19 @@ const StatsGraph = ({
             dataKey="newDeaths"
             stroke="#dc0000de"
             dot={false}
+            name="Deaths"
+          />
+        )}
+        {applyWeighting && (
+          <Line
+            yAxisId="left"
+            type="monotone"
+            dataKey="weightedStats"
+            stroke="#923f0a"
+            strokeWidth={3}
+            strokeDasharray={"2 2"}
+            dot={false}
+            name="Weighted Cases"
           />
         )}
       </LineChart>
@@ -126,6 +147,32 @@ const calcMovingAverage = (stats: Stats[], days: number): number[] => {
     movingAverage.push(sum / count);
   }
   return movingAverage;
+};
+
+const getMaxTests = (stats: Stats[]): number | null => {
+  let numTests: number | null = null;
+  for (let i = 0; i < stats.length; i++) {
+    const stat = stats[i];
+    if (
+      numTests === null ||
+      (stat.newTests !== null && stat.newTests > numTests)
+    ) {
+      numTests = stat.newTests;
+    }
+  }
+  return numTests;
+};
+
+const calcWeightedStats = (
+  stat: Stats,
+  maxTests: number | null
+): number | null => {
+  if (maxTests === null || stat.newTests === null) {
+    // unable to apply any weighting
+    return null;
+  }
+  const ratio = maxTests / stat.newTests;
+  return stat.newCases * ratio;
 };
 
 export default StatsGraph;

@@ -106,15 +106,21 @@ const StatsContainer = () => {
       />
     );
 
+  const showApplyWeighting = [AreaTypes.overview, AreaTypes.nation].includes(
+    areaType
+  );
+
   const graph = (
-    <StatsGraph stats={stats} displayDeaths={areaType !== AreaTypes.postCode} />
+    <StatsGraph
+      stats={stats}
+      displayDeaths={areaType !== AreaTypes.postCode}
+      applyWeighting={showApplyWeighting && applyWeighting}
+    />
   );
 
   const graphOptionsComponent = (
     <GraphOptions
-      showApplyWeighting={[AreaTypes.overview, AreaTypes.nation].includes(
-        areaType
-      )}
+      showApplyWeighting={showApplyWeighting}
       applyWeighting={applyWeighting}
       setApplyWeighting={(v: boolean) => setApplyWeighting(v)}
     />
