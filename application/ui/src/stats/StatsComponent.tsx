@@ -7,6 +7,7 @@ import {
   Input,
   Segment,
 } from "semantic-ui-react";
+import InfoPopup from "../utils/InfoPopup";
 import { AreaTypes } from "./stats";
 
 interface OptionsType {
@@ -193,7 +194,6 @@ export const PostCodeSearch = ({
       Enter Post Code:{" "}
       <Input
         size={"mini"}
-        loading={loading}
         disabled={loading}
         value={postCode}
         onChange={(e, { value }) => {
@@ -204,17 +204,16 @@ export const PostCodeSearch = ({
           if (searchTimeout.current !== undefined) {
             clearTimeout(searchTimeout.current);
           }
-          // Only perform a search when the user stops typing for 750 ms
+          // Only perform a search when the user stops typing for 1500 ms
           searchTimeout.current = setTimeout(() => {
             const r = searchRadius === null ? 0 : searchRadius;
             getStatsForPostCode(postCode, r);
-          }, 750);
+          }, 1500);
         }}
       />{" "}
       Within{" "}
       <Input
         size={"mini"}
-        loading={loading}
         disabled={loading}
         value={searchRadius === null ? "" : searchRadius}
         onChange={(e, { value }) => {
@@ -235,10 +234,43 @@ export const PostCodeSearch = ({
           // Only perform a search when the user stops typing for 750 ms
           searchTimeout.current = setTimeout(() => {
             getStatsForPostCode(postCode, r);
-          }, 500);
+          }, 750);
         }}
       />{" "}
       Kilometers
+      <InfoPopup
+        header="Post Code Search"
+        content={
+          <div>
+            <p>
+              The post code search takes your postcode, and looks up local
+              authorities within the search radius and sums up all stats from
+              all authorities. If no local authorites are found within your
+              search radius, it will find the nearest for you.
+            </p>
+            <ul
+              style={{
+                listStyleType: "none",
+                padding: 0,
+                margin: 0,
+              }}
+            >
+              <li>
+                Contains OS data © Crown copyright and database right{" "}
+                {new Date().getFullYear()}.
+              </li>
+              <li>
+                Contains Royal Mail data © Royal Mail copyright and database
+                right {new Date().getFullYear()}.
+              </li>
+              <li>
+                Source: Office for National Statistics licensed under the Open
+                Government Licence v.3.0.
+              </li>
+            </ul>
+          </div>
+        }
+      />
     </div>
   );
 };

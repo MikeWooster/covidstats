@@ -3,7 +3,7 @@ import { Icon, Popup } from "semantic-ui-react";
 
 interface props {
   header: string;
-  content: string;
+  content: React.ReactElement;
 }
 
 const InfoPopup: React.FC<props> = ({ header, content }) => {
@@ -20,7 +20,9 @@ const InfoPopup: React.FC<props> = ({ header, content }) => {
           style={{ marginLeft: 7, borderTop: 50 }}
         />
       }
-    />
+    >
+      {content}
+    </Popup>
   );
 };
 
