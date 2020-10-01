@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Segment } from "semantic-ui-react";
+import GraphOptions from "./GraphOptionsComponent";
 import {
   AreaTypes,
   getNations,
@@ -25,6 +26,8 @@ const StatsContainer = () => {
   const [err, setErr] = useState<Error | null>(null);
   const [nations, setNations] = useState<string[]>([]);
   const [regions, setRegions] = useState<string[]>([]);
+
+  const [applyWeighting, setApplyWeighting] = useState(false);
 
   const postCodeSearchTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
 
@@ -107,11 +110,22 @@ const StatsContainer = () => {
     <StatsGraph stats={stats} displayDeaths={areaType !== AreaTypes.postCode} />
   );
 
+  const graphOptionsComponent = (
+    <GraphOptions
+      showApplyWeighting={[AreaTypes.overview, AreaTypes.nation].includes(
+        areaType
+      )}
+      applyWeighting={applyWeighting}
+      setApplyWeighting={(v: boolean) => setApplyWeighting(v)}
+    />
+  );
+
   return (
     <StatsComponent
       areaOptions={areaOptionsComponent}
       searchRefinement={searchRefinementComponent}
       graph={graph}
+      graphOptions={graphOptionsComponent}
       err={errComponent}
     />
   );

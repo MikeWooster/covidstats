@@ -19,11 +19,13 @@ const StatsComponent = ({
   areaOptions,
   searchRefinement,
   graph,
+  graphOptions,
   err,
 }: {
   areaOptions: React.ReactElement;
   searchRefinement: React.ReactElement;
   graph: React.ReactElement;
+  graphOptions: React.ReactElement;
   err: React.ReactElement | null;
 }) => {
   return (
@@ -38,6 +40,8 @@ const StatsComponent = ({
       </Segment>
       <Divider horizontal />
       {graph}
+      <Divider horizontal />
+      {graphOptions}
     </Container>
   );
 };
