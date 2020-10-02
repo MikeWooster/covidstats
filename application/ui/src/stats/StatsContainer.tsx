@@ -91,7 +91,15 @@ const StatsContainer: React.FC<{}> = () => {
         searchRadius={searchRadius}
         setSearchRadius={setSearchRadius}
         getStatsForPostCode={getAndSetStatsForPostCode}
-        searchTimeout={postCodeSearchTimeout}
+        setTimer={(v: NodeJS.Timeout | undefined) =>
+          (postCodeSearchTimeout.current = v)
+        }
+        clearTimer={() => {
+          if (postCodeSearchTimeout.current !== undefined) {
+            clearTimeout(postCodeSearchTimeout.current);
+            postCodeSearchTimeout.current = undefined;
+          }
+        }}
         loading={loading}
       />
     ) : (
