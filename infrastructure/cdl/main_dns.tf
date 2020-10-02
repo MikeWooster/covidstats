@@ -33,6 +33,19 @@ resource "aws_route53_record" "covidstats_www_redirect" {
 
   alias {
     evaluate_target_health = false
+    name = aws_cloudfront_distribution.redirect_www.domain_name
+    zone_id = aws_cloudfront_distribution.redirect_www.hosted_zone_id
+  }
+}
+
+# Create Alias record to route any other random queries to the distrobution
+resource "aws_route53_record" "covidstats_redirect_all" {
+  name = "*.covidstats.uk"
+  type = "A"
+  zone_id = aws_route53_zone.covidstats.zone_id
+
+  alias {
+    evaluate_target_health = false
     name = aws_cloudfront_distribution.main.domain_name
     zone_id = aws_cloudfront_distribution.main.hosted_zone_id
   }
@@ -63,3 +76,4 @@ resource "aws_route53_query_log" "covidstats_public_dns" {
   cloudwatch_log_group_arn = aws_cloudwatch_log_group.covidstats_public_dns.arn
   zone_id                  = aws_route53_zone.covidstats.zone_id
 }
+
