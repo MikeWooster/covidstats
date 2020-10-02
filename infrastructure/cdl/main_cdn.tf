@@ -2,10 +2,6 @@
 # Create a Cloudfront distribution for the static website
 # ---------------------------------------------------------------------------------------------------------------------
 
-resource "aws_cloudfront_origin_access_identity" "main" {
-  comment = "Access ID for covidstats.uk"
-}
-
 resource "aws_cloudfront_distribution" "main" {
   enabled      = true
   price_class  = "PriceClass_100"
@@ -18,7 +14,7 @@ resource "aws_cloudfront_distribution" "main" {
     domain_name = data.terraform_remote_state.s3.outputs.website_regional_domain_name
 
     s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.main.cloudfront_access_identity_path
+      origin_access_identity = data.terraform_remote_state.s3.outputs.cloudfront_oai_path
     }
   }
 
