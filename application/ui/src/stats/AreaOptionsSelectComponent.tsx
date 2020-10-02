@@ -43,8 +43,9 @@ const AreaOptionsSelect: React.FC<props> = ({
   ];
   return (
     <div>
-      Display data for{" "}
+      <label htmlFor="areaTypeSelectInput">Display data for </label>
       <Dropdown
+        id="areaTypeSelectInput"
         inline
         options={areaOptions}
         onChange={(e, { value }) => {
