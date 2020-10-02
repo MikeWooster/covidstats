@@ -8,7 +8,8 @@ interface props {
   searchRadius: number | null;
   setSearchRadius: (v: number | null) => void;
   getStatsForPostCode: (p: string, r: number) => void;
-  searchTimeout: React.MutableRefObject<NodeJS.Timeout | undefined>;
+  setTimer: (v: NodeJS.Timeout | undefined) => void;
+  clearTimer: () => void;
   loading: boolean;
 }
 
@@ -18,7 +19,8 @@ const PostCodeSearch: React.FC<props> = ({
   searchRadius,
   setSearchRadius,
   getStatsForPostCode,
-  searchTimeout,
+  setTimer,
+  clearTimer,
   loading,
 }) => {
   return (
@@ -33,14 +35,14 @@ const PostCodeSearch: React.FC<props> = ({
           setRefinedArea(postCode);
           // When the search query changes, cancel any pending
           // search requests
-          if (searchTimeout.current !== undefined) {
-            clearTimeout(searchTimeout.current);
-          }
+          clearTimer();
           // Only perform a search when the user stops typing for 1500 ms
-          searchTimeout.current = setTimeout(() => {
-            const r = searchRadius === null ? 0 : searchRadius;
-            getStatsForPostCode(postCode, r);
-          }, 1500);
+          setTimer(
+            setTimeout(() => {
+              const r = searchRadius === null ? 0 : searchRadius;
+              getStatsForPostCode(postCode, r);
+            }, 1500)
+          );
         }}
       />{" "}
       Within{" "}
@@ -60,13 +62,13 @@ const PostCodeSearch: React.FC<props> = ({
           setSearchRadius(r);
           // When the search query changes, cancel any pending
           // search requests
-          if (searchTimeout.current !== undefined) {
-            clearTimeout(searchTimeout.current);
-          }
+          clearTimer();
           // Only perform a search when the user stops typing for 750 ms
-          searchTimeout.current = setTimeout(() => {
-            getStatsForPostCode(postCode, r);
-          }, 750);
+          setTimer(
+            setTimeout(() => {
+              getStatsForPostCode(postCode, r);
+            }, 750)
+          );
         }}
       />{" "}
       Kilometers
