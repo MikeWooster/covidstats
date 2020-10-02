@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Segment } from "semantic-ui-react";
+import AreaOptionsSelect from "./AreaOptionsSelectComponent";
+import AreaRefinementSearch from "./AreaRefinementSearchComponent";
 import GraphOptions from "./GraphOptionsComponent";
+import PostCodeSearch from "./PostCodeSearchComponent";
 import {
   AreaTypes,
   getNations,
@@ -9,14 +12,10 @@ import {
   getStatsForPostCode,
   Stats,
 } from "./stats";
-import StatsComponent, {
-  AreaOptionsSelect,
-  AreaRefinementSearch,
-  PostCodeSearch,
-} from "./StatsComponent";
+import StatsComponent from "./StatsComponent";
 import StatsGraph from "./StatsGraph";
 
-const StatsContainer = () => {
+const StatsContainer: React.FC<{}> = () => {
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<Stats[]>([]);
   const [areaType, setAreaType] = useState(AreaTypes.overview);

@@ -2,14 +2,15 @@ import React from "react";
 import { Checkbox } from "semantic-ui-react";
 import InfoPopup from "../utils/InfoPopup";
 
-const GraphOptions = ({
-  showApplyWeighting,
-  applyWeighting,
-  setApplyWeighting,
-}: {
+interface props {
   showApplyWeighting: boolean;
   applyWeighting: boolean;
   setApplyWeighting: (v: boolean) => void;
+}
+const GraphOptions: React.FC<props> = ({
+  showApplyWeighting,
+  applyWeighting,
+  setApplyWeighting,
 }) => {
   return (
     <span>
