@@ -46,21 +46,24 @@ const AreaRefinementSearch: React.FC<props> = ({
       break;
   }
 
-  const searchInput = (
-    <Dropdown
-      inline
-      search
-      disabled={disabled}
-      options={searchOptions}
-      onChange={(e, { value }) => {
-        const selected = value as string;
-        setRefinedArea(selected);
-        getStats(areaType, selected);
-      }}
-      value={refinedArea}
-    />
+  return (
+    <div>
+      <label htmlFor="areaRefinementSearchInput">Refine results </label>
+      <Dropdown
+        id="areaRefinementSearchInput"
+        inline
+        search
+        disabled={disabled}
+        options={searchOptions}
+        onChange={(e, { value }) => {
+          const selected = value as string;
+          setRefinedArea(selected);
+          getStats(areaType, selected);
+        }}
+        value={refinedArea}
+      />
+    </div>
   );
-  return <div>Refine results: {searchInput}</div>;
 };
 
 export default AreaRefinementSearch;
