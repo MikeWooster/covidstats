@@ -33,21 +33,8 @@ resource "aws_route53_record" "covidstats_www_redirect" {
 
   alias {
     evaluate_target_health = false
-    name = aws_cloudfront_distribution.redirect_www.domain_name
-    zone_id = aws_cloudfront_distribution.redirect_www.hosted_zone_id
-  }
-}
-
-# Create Alias record to route any other random queries to the distrobution
-resource "aws_route53_record" "covidstats_redirect_all" {
-  name = "*.covidstats.uk"
-  type = "A"
-  zone_id = aws_route53_zone.covidstats.zone_id
-
-  alias {
-    evaluate_target_health = false
-    name = aws_cloudfront_distribution.main.domain_name
-    zone_id = aws_cloudfront_distribution.main.hosted_zone_id
+    name = data.terraform_remote_state.s3.outputs.redirect_www_website_domain
+    zone_id = data.terraform_remote_state.s3.outputs.redirect_www_website_hosted_zone_id
   }
 }
 
