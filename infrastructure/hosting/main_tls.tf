@@ -1,14 +1,14 @@
 
 #---------------------------------------
-# Set up SSL on the domain
+# Set up TLS on the domain
 #---------------------------------------
 
 resource "aws_acm_certificate" "main" {
   # Certificate must be in us east 1
   provider = aws.us-east-1
 
-  domain_name       = "covidstats.uk"
-  validation_method = "DNS"
+  domain_name               = "covidstats.uk"
+  validation_method         = "DNS"
   subject_alternative_names = ["*.covidstats.uk"]
 
   lifecycle {
@@ -39,6 +39,7 @@ resource "aws_route53_record" "acm_cert_validation" {
 # Complete the validation
 resource "aws_acm_certificate_validation" "main" {
   depends_on = [aws_route53_record.acm_cert_validation, aws_acm_certificate.main]
+
   # certificate validation must be performed in the same region as the cert.
   provider = aws.us-east-1
 

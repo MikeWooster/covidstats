@@ -4,7 +4,7 @@
 
 resource "aws_s3_bucket" "main" {
   bucket = "covidstats.uk"
-  acl    = "public-read"
+  acl    = "private"
 
   website {
     index_document = "index.html"
@@ -36,19 +36,15 @@ resource "aws_s3_bucket_public_access_block" "main" {
   restrict_public_buckets = true
 }
 
-# Allow CloudFront access to the bucket
-resource "aws_cloudfront_origin_access_identity" "main" {
-  comment = "Access ID for covidstats.uk from CloudFront"
-}
-
 resource "aws_s3_bucket_policy" "main" {
+  depends_on = [aws_cloudfront_origin_access_identity.main]
+
   bucket = aws_s3_bucket.main.id
   policy = templatefile("templates/static-hosting-bucket-policy.tmpl", {
-    bucket_arn = aws_s3_bucket.main.arn,
-    cloudfront_oai_arn=aws_cloudfront_origin_access_identity.main.iam_arn
+    bucket_arn         = aws_s3_bucket.main.arn,
+    cloudfront_oai_arn = aws_cloudfront_origin_access_identity.main.iam_arn
   })
 }
-
 
 # Route traffic from www.covidstats.uk to covidstats.uk
 resource "aws_s3_bucket" "redirect_www" {
@@ -60,7 +56,7 @@ resource "aws_s3_bucket" "redirect_www" {
   }
 
   tags = merge(local.common_tags, {
-    Name        = "${local.prefix}-www-rerouting-bucket",
+    Name = "${local.prefix}-www-rerouting-bucket",
   })
 }
 
