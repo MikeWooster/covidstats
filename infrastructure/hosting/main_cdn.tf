@@ -2,28 +2,36 @@
 # Create a Cloudfront distribution for the static website
 # ---------------------------------------------------------------------------------------------------------------------
 
+# Create a cloudfront "user" for permissions to be hung off.
+resource "aws_cloudfront_origin_access_identity" "main" {
+  comment = "Access ID for covidstats.uk from CloudFront"
+}
+
+# Create the main website distribution
 resource "aws_cloudfront_distribution" "main" {
-  enabled      = true
-  price_class  = "PriceClass_100"
-  http_version = "http2"
+  depends_on = [aws_cloudfront_origin_access_identity.main, aws_s3_bucket.main, aws_acm_certificate.main]
+
+  enabled             = true
+  price_class         = "PriceClass_100"
+  http_version        = "http2"
   is_ipv6_enabled     = true
   default_root_object = "index.html"
 
   origin {
-    origin_id   = "S3-${data.terraform_remote_state.s3.outputs.website_regional_domain_name}"
-    domain_name = data.terraform_remote_state.s3.outputs.website_regional_domain_name
+    origin_id   = "S3-${aws_s3_bucket.main.bucket_regional_domain_name}"
+    domain_name = aws_s3_bucket.main.bucket_regional_domain_name
 
     s3_origin_config {
-      origin_access_identity = data.terraform_remote_state.s3.outputs.cloudfront_oai_path
+      origin_access_identity = aws_cloudfront_origin_access_identity.main.cloudfront_access_identity_path
     }
   }
 
   aliases = ["covidstats.uk"]
 
   default_cache_behavior {
-    allowed_methods = ["GET", "HEAD"]
-    cached_methods  = ["GET", "HEAD"]
-    target_origin_id = "S3-${data.terraform_remote_state.s3.outputs.website_regional_domain_name}"
+    allowed_methods  = ["GET", "HEAD"]
+    cached_methods   = ["GET", "HEAD"]
+    target_origin_id = "S3-${aws_s3_bucket.main.bucket_regional_domain_name}"
 
     forwarded_values {
       query_string = false
@@ -33,9 +41,9 @@ resource "aws_cloudfront_distribution" "main" {
       }
     }
 
-    min_ttl          = 0
-    default_ttl      = 300
-    max_ttl          = 1200
+    min_ttl     = 0
+    default_ttl = 300
+    max_ttl     = 1200
 
     // This redirects any HTTP request to HTTPS.
     viewer_protocol_policy = "redirect-to-https"
