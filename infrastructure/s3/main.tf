@@ -72,16 +72,3 @@ resource "aws_s3_bucket_public_access_block" "redirect_www" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
-
-# Allow CloudFront access to the bucket
-resource "aws_cloudfront_origin_access_identity" "redirect_www" {
-  comment = "Access ID for www.covidstats.uk from CloudFront"
-}
-
-resource "aws_s3_bucket_policy" "redirect_www" {
-  bucket = aws_s3_bucket.redirect_www.id
-  policy = templatefile("templates/static-hosting-bucket-policy.tmpl", {
-    bucket_arn = aws_s3_bucket.redirect_www.arn,
-    cloudfront_oai_arn=aws_cloudfront_origin_access_identity.redirect_www.iam_arn
-  })
-}
