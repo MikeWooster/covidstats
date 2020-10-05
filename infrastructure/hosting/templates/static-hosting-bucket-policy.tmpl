@@ -14,6 +14,23 @@
       "Resource": [
         "${bucket_arn}/*"
       ]
+    },
+    {
+      "Sid": "Deployment User Access",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "arn:aws:iam::842681785316:root",
+          "arn:aws:iam::842681785316:user/covidstatsuk-deploy"
+        ]
+      },
+      "Action": [
+        "s3:*"
+      ],
+      "Resource": [
+        "${bucket_arn}",
+        "${bucket_arn}/*"
+      ]
     }
   ]
 }
