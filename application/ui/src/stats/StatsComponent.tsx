@@ -1,5 +1,5 @@
 import React from "react";
-import { Container, Divider, Header, Segment } from "semantic-ui-react";
+import { Container, Divider, Header, Loader, Segment } from "semantic-ui-react";
 
 interface props {
   areaOptions: React.ReactElement;
@@ -7,6 +7,7 @@ interface props {
   graph: React.ReactElement;
   graphOptions: React.ReactElement;
   err: React.ReactElement | null;
+  loading: boolean;
 }
 
 const StatsComponent: React.FC<props> = ({
@@ -15,6 +16,7 @@ const StatsComponent: React.FC<props> = ({
   graph,
   graphOptions,
   err,
+  loading,
 }) => {
   return (
     <Container>
@@ -25,6 +27,7 @@ const StatsComponent: React.FC<props> = ({
         {areaOptions}
         {searchRefinement}
         {err && err}
+        <Loader active={loading} inline />
       </Segment>
       <Divider horizontal />
       {graph}

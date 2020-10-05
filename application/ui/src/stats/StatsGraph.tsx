@@ -16,21 +16,34 @@ interface props {
   stats: Stats[];
   displayDeaths: boolean;
   applyWeighting: boolean;
+  applyPopulationScaling: boolean;
 }
 
 const StatsGraph: React.FC<props> = ({
   stats,
   displayDeaths,
   applyWeighting,
+  applyPopulationScaling,
 }) => {
-  const movingAverage = calcMovingAverage(stats, 7);
   const maxTests = getMaxTests(stats);
+  const population = stats.length > 0 ? stats[stats.length - 1].population : 0;
+
+  const movingAverage = calcMovingAverage(stats, (s: Stats) => s.newCases, 7);
+  const movingAvPopScaled = calcMovingAverage(
+    stats,
+    (s: Stats) => scaleByPopulation(s.newCases, population) || 0,
+    7
+  );
+
   const data = stats.map((s, i) => ({
     ...s,
     date: s.date.toDate().getTime(),
     newCasesMvgAvg: movingAverage[i],
     weightedStats: calcWeightedStats(s, maxTests),
+    populationScaledCases: scaleByPopulation(s.newCases, population),
+    populationScaledCasesMvgAvg: movingAvPopScaled[i],
   }));
+
   return (
     <ResponsiveContainer width="100%" height={600}>
       <LineChart
@@ -47,7 +60,7 @@ const StatsGraph: React.FC<props> = ({
         <YAxis
           yAxisId="left"
           label={{
-            value: "Cases",
+            value: applyPopulationScaling ? "Cases per 100,000" : "Cases",
             position: "insideLeft",
             angle: -90,
             dy: -20,
@@ -72,19 +85,26 @@ const StatsGraph: React.FC<props> = ({
         <Line
           yAxisId="left"
           type="monotone"
-          dataKey="newCases"
+          dataKey={
+            applyPopulationScaling ? "populationScaledCases" : "newCases"
+          }
           stroke="#8884d8"
           dot={false}
-          name="New Cases"
+          name={applyPopulationScaling ? "New Cases per 100,000" : "New Cases"}
         />
         <Line
           yAxisId="left"
           type="monotone"
-          dataKey="newCasesMvgAvg"
+          dataKey={
+            applyPopulationScaling
+              ? "populationScaledCasesMvgAvg"
+              : "newCasesMvgAvg"
+          }
           stroke="#1c074a"
           dot={false}
           name="New Cases (moving average)"
         />
+        )
         {displayDeaths && (
           <Line
             yAxisId="right"
@@ -116,7 +136,11 @@ const tickFormatter = (unixTime: number): string => {
   return moment(unixTime).format("YYYY-MM-DD");
 };
 
-const calcMovingAverage = (stats: Stats[], days: number): number[] => {
+const calcMovingAverage = (
+  stats: Stats[],
+  valGetter: (s: Stats) => number,
+  days: number
+): number[] => {
   const movingAverage = [];
   const windowR = days / 2;
   for (let i = 0; i < stats.length; i++) {
@@ -130,7 +154,7 @@ const calcMovingAverage = (stats: Stats[], days: number): number[] => {
     let date = stat.date;
     let j = i;
     while (j >= 0 && date.isSameOrAfter(minDate)) {
-      sum += stats[j].newCases;
+      sum += valGetter(stats[j]);
       date = stats[j].date;
       count++;
       j--;
@@ -139,7 +163,7 @@ const calcMovingAverage = (stats: Stats[], days: number): number[] => {
     date = stat.date;
     let k = i;
     while (k < stats.length && date.isSameOrBefore(maxDate)) {
-      sum += stats[k].newCases;
+      sum += valGetter(stats[k]);
       date = stats[k].date;
       count++;
       k++;
@@ -173,6 +197,18 @@ const calcWeightedStats = (
   }
   const ratio = maxTests / stat.newTests;
   return stat.newCases * ratio;
+};
+
+// scaleByPopulation takes the number and applies a scaling to
+// give the number of X per 100,000.
+const scaleByPopulation = (
+  v: number | null,
+  population: number | null
+): number | null => {
+  if (v === null || population === null) {
+    return null;
+  }
+  return (100000 * v) / population;
 };
 
 export default StatsGraph;

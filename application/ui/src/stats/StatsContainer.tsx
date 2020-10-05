@@ -27,6 +27,7 @@ const StatsContainer: React.FC<{}> = () => {
   const [regions, setRegions] = useState<string[]>([]);
 
   const [applyWeighting, setApplyWeighting] = useState(false);
+  const [applyPopulationScaling, setApplyPopulationScaling] = useState(false);
 
   const postCodeSearchTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
 
@@ -80,7 +81,12 @@ const StatsContainer: React.FC<{}> = () => {
       getStats={getAndSetStats}
       nations={nations}
       regions={regions}
-      setRefinedArea={setRefinedArea}
+      setRefinedArea={(v: string) => {
+        if (v === "") {
+          setStats([]);
+          setRefinedArea(v);
+        }
+      }}
     />
   );
   const searchRefinementComponent =
@@ -122,6 +128,7 @@ const StatsContainer: React.FC<{}> = () => {
       stats={stats}
       displayDeaths={areaType !== AreaTypes.postCode}
       applyWeighting={showApplyWeighting && applyWeighting}
+      applyPopulationScaling={applyPopulationScaling}
     />
   );
 
@@ -130,6 +137,8 @@ const StatsContainer: React.FC<{}> = () => {
       showApplyWeighting={showApplyWeighting}
       applyWeighting={applyWeighting}
       setApplyWeighting={(v: boolean) => setApplyWeighting(v)}
+      applyPopulationScaling={applyPopulationScaling}
+      setApplyPopulationScaling={(v: boolean) => setApplyPopulationScaling(v)}
     />
   );
 
@@ -140,6 +149,7 @@ const StatsContainer: React.FC<{}> = () => {
       graph={graph}
       graphOptions={graphOptionsComponent}
       err={errComponent}
+      loading={loading}
     />
   );
 };
