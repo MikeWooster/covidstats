@@ -20,6 +20,7 @@ export interface Stats {
   newCases: number;
   newDeaths: number;
   newTests: number | null;
+  population: number | null;
 }
 
 export const getNations = async (): Promise<string[]> => {
@@ -72,6 +73,7 @@ const formatStats = (stats: StatsDataResponse[]): Stats[] => {
       newCases: s.newCasesBySpecimenDate,
       newDeaths: nullToZero(s.newDeaths28DaysByDeathDate),
       newTests: s.newPCRTestsByPublishDate,
+      population: calculatePopulation(s),
     }))
     .filter((s) => s.date <= moment().startOf("day"))
     .sort((a, b) => (a.date.isBefore(b.date) ? -1 : 1));
@@ -102,6 +104,18 @@ const aggregated = (stats: StatsDataResponse[]): StatsDataResponse[] => {
         aggregator[stat.date].newPCRTestsByPublishDate,
         stat.newPCRTestsByPublishDate
       );
+
+      aggregator[
+        stat.date
+      ].cumCasesByPublishDateRate = calcNewCumCasesByPublishDateRate(
+        aggregator[stat.date],
+        stat
+      );
+
+      aggregator[stat.date].cumCasesByPublishDate = sumVals(
+        aggregator[stat.date].cumCasesByPublishDate,
+        stat.cumCasesByPublishDate
+      );
     } else {
       aggregator[stat.date] = {
         ...stat,
@@ -129,4 +143,38 @@ const sumVals = (a: number | null, b: number | null): number | null => {
     return a;
   }
   return a + b;
+};
+
+const calcNewCumCasesByPublishDateRate = (
+  a: StatsDataResponse,
+  b: StatsDataResponse
+): number | null => {
+  const aPop = calculatePopulation(a);
+  const bPop = calculatePopulation(b);
+
+  if (aPop === null) {
+    return b.cumCasesByPublishDateRate;
+  }
+  if (bPop === null) {
+    return a.cumCasesByPublishDateRate;
+  }
+
+  const newTotal =
+    (a.cumCasesByPublishDate as number) + (b.cumCasesByPublishDate as number);
+  const newPop = aPop + bPop;
+
+  return (100000 * newTotal) / newPop;
+};
+
+const calculatePopulation = (s: StatsDataResponse): number | null => {
+  const {
+    cumCasesByPublishDate: totalCases,
+    cumCasesByPublishDateRate: rate,
+  } = s;
+
+  if (totalCases === null || rate === null) {
+    return null;
+  }
+  const pop = (100000 * totalCases) / rate;
+  return pop;
 };
