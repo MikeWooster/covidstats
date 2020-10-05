@@ -2,6 +2,11 @@ on:
   workflow_dispatch:
     paths:
       - "application/ui/**"
+  push:
+    branches:
+      - main
+    paths:
+      - "application/ui/**"
 
 defaults:
   run:
