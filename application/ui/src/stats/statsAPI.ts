@@ -62,17 +62,17 @@ export const fetchStats = async (
 export const fetchStatsForLTLAs = async (
   codes: string[]
 ): Promise<StatsDataResponse[]> => {
+  const promises = codes.map((code) =>
+    paginate(buildURL({ areaType: "ltla", areaCode: code }))
+  );
+  const responses = await Promise.all(promises);
+
   const stats: StatsDataResponse[] = [];
-  const extendStats = (newStats: StatsDataResponse[]) => {
-    for (let i = 0; i < newStats.length; i++) {
-      stats.push(newStats[i]);
+  // Flatten the array of responses into a single array of stats
+  for (let i = 0; i < responses.length; i++) {
+    for (let j = 0; j < responses[i].length; j++) {
+      stats.push(responses[i][j]);
     }
-  };
-  for (let i = 0; i < codes.length; i++) {
-    const newStats = await paginate(
-      buildURL({ areaType: "ltla", areaCode: codes[i] })
-    );
-    extendStats(newStats);
   }
   return stats;
 };

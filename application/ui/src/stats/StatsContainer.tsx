@@ -84,8 +84,8 @@ const StatsContainer: React.FC<{}> = () => {
       setRefinedArea={(v: string) => {
         if (v === "") {
           setStats([]);
-          setRefinedArea(v);
         }
+        setRefinedArea(v);
       }}
     />
   );
