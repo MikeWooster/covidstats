@@ -1,13 +1,12 @@
-import moment from "moment";
-import { Moment } from "moment";
+import moment, { Moment } from "moment";
+import { getNeighbouringLAs } from "./geo";
+import { geocodePostCode } from "./postCodeAPI";
 import {
-  fetchAllStatsForDate,
+  fetchAllRegionStatsForDate,
   fetchStats,
   fetchStatsForLTLAs,
   StatsDataResponse,
 } from "./statsAPI";
-import { getNeighbouringLAs } from "./geo";
-import { geocodePostCode } from "./postCodeAPI";
 
 export enum AreaTypes {
   overview = "overview",
@@ -15,20 +14,47 @@ export enum AreaTypes {
   region = "region",
   postCode = "postCode",
 }
-export interface Stats {
+
+export interface Stat {
   date: Moment;
   newCases: number;
   newDeaths: number;
   newTests: number | null;
-  population: number | null;
 }
+
+interface Area {
+  areaCode: string;
+  areaName: string;
+  population: number | null;
+  maxTests: number | null;
+  stats: string[];
+}
+
+interface Date {
+  asString: string;
+  asMoment: Moment;
+  stats: string[];
+  totals: { totalDeaths: number; totalCases: number };
+}
+
+export interface NormalizedStats {
+  stats: { [key: string]: Stat };
+  areas: Area[];
+  dates: Date[];
+}
+
+export const EMPTY_STATS: NormalizedStats = {
+  stats: {},
+  areas: [],
+  dates: [],
+};
 
 export const getNations = async (): Promise<string[]> => {
   return Promise.resolve(["England", "Northern Ireland", "Scotland", "Wales"]);
 };
 
 export const getRegions = async (): Promise<string[]> => {
-  const data = await fetchAllStatsForDate("2020-09-01");
+  const data = await fetchAllRegionStatsForDate("2020-09-01");
   const regions = data
     .filter((p) => p.areaType === AreaTypes.region)
     .map((p) => p.areaName);
@@ -38,7 +64,7 @@ export const getRegions = async (): Promise<string[]> => {
 export const getStats = async (
   areaType: AreaTypes,
   refinedArea: string
-): Promise<Stats[]> => {
+): Promise<NormalizedStats> => {
   let stats: StatsDataResponse[] = [];
   if (areaType === AreaTypes.overview) {
     stats = await fetchStats(areaType, "");
@@ -53,7 +79,7 @@ export const getStats = async (
 export const getStatsForPostCode = async (
   postCode: string,
   r: number
-): Promise<Stats[]> => {
+): Promise<NormalizedStats> => {
   if (r >= 100) {
     throw new Error(
       "Search distance is too large, try reducing the search, or change the data display type."
@@ -66,19 +92,98 @@ export const getStatsForPostCode = async (
   return formatStats(stats);
 };
 
-const formatStats = (stats: StatsDataResponse[]): Stats[] => {
-  return aggregated(stats)
-    .map((s) => ({
-      date: moment(s.date, "YYYY-MM-DD"),
-      newCases: s.newCasesBySpecimenDate,
-      newDeaths: nullToZero(s.newDeaths28DaysByDeathDate),
-      newTests: s.newPCRTestsByPublishDate,
-      population: calculatePopulation(s),
-    }))
-    .filter((s) => s.date <= moment().startOf("day"))
-    .sort((a, b) => (a.date.isBefore(b.date) ? -1 : 1));
+const formatStats = (stats: StatsDataResponse[]): NormalizedStats => {
+  const ns: NormalizedStats = { stats: {}, areas: [], dates: [] };
+  const areas: { [key: string]: Area } = {};
+  const dates: { [key: string]: Date } = {};
+
+  // Keep track of the area type - we don't want to mix different
+  // area types in our response, as this will indicate we are double
+  // counting cases, etc.
+  let areaType: string | null = null;
+
+  for (let i = 0; i < stats.length; i++) {
+    const stat = stats[i];
+
+    if (areaType !== null && stat.areaType !== areaType) {
+      continue;
+    }
+    areaType = stat.areaType;
+
+    const statKey = `${stat.date}-${stat.areaCode}`;
+    ns.stats[statKey] = {
+      date: moment(stat.date, "YYYY-MM-DD"),
+      newCases: stat.newCasesBySpecimenDate,
+      newDeaths: nullToZero(stat.newDeaths28DaysByDeathDate),
+      newTests: stat.newPCRTestsByPublishDate,
+    };
+
+    if (!(stat.areaCode in areas)) {
+      areas[stat.areaCode] = {
+        areaCode: stat.areaCode,
+        areaName: stat.areaName,
+        population: null,
+        maxTests: null,
+        stats: [],
+      };
+    }
+    areas[stat.areaCode].stats.push(statKey);
+    const population = calculatePopulation(stat);
+    if (population !== null) {
+      areas[stat.areaCode].population = population;
+    }
+
+    if (!(stat.date in dates)) {
+      dates[stat.date] = {
+        asString: stat.date,
+        asMoment: ns.stats[statKey].date,
+        stats: [],
+        totals: { totalCases: 0, totalDeaths: 0 },
+      };
+    }
+    dates[stat.date].stats.push(statKey);
+  }
+
+  // Calculate the maximum number of tests per area
+  for (let key in areas) {
+    areas[key].maxTests = getMaxTests(
+      areas[key].stats.map((st) => ns.stats[st])
+    );
+  }
+
+  // Calculate the total cases per day
+  for (let key in dates) {
+    dates[key].totals.totalCases = dates[key].stats
+      .map((st) => ns.stats[st].newCases)
+      .reduce((a, b) => a + b, 0);
+    dates[key].totals.totalDeaths = dates[key].stats
+      .map((st) => ns.stats[st].newDeaths)
+      .reduce((a, b) => a + b, 0);
+  }
+
+  // Add the dates/areas to the normalized stats
+  // Dates must also be sorted oldest to newest.
+  ns.dates = Object.values(dates).sort((a, b) =>
+    a.asMoment.isBefore(b.asMoment) ? -1 : 1
+  );
+  ns.areas = Object.values(areas);
+
+  return ns;
 };
 
+const getMaxTests = (stats: Stat[]): number | null => {
+  let numTests: number | null = null;
+  for (let i = 0; i < stats.length; i++) {
+    const stat = stats[i];
+    if (
+      numTests === null ||
+      (stat.newTests !== null && stat.newTests > numTests)
+    ) {
+      numTests = stat.newTests;
+    }
+  }
+  return numTests;
+};
 // aggregated will reduce the stats to a daily SUM when there are multiple days of stats.
 // we will lose some of the info - i.e. the areaType/areaName, but oh well.
 const aggregated = (stats: StatsDataResponse[]): StatsDataResponse[] => {
@@ -176,5 +281,8 @@ const calculatePopulation = (s: StatsDataResponse): number | null => {
     return null;
   }
   const pop = (100000 * totalCases) / rate;
+  if (isNaN(pop) || !isFinite(pop)) {
+    return null;
+  }
   return pop;
 };

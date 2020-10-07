@@ -32,11 +32,12 @@ interface StatsResponse {
   };
 }
 
-export const fetchAllStatsForDate = async (
+export const fetchAllRegionStatsForDate = async (
   date: string
 ): Promise<StatsDataResponse[]> => {
   const filters: { [key: string]: string } = {
     date: date,
+    areaType: AreaTypes.region,
   };
 
   const url = buildURL(filters);
