@@ -1,7 +1,7 @@
 import moment, { Moment } from "moment";
 import React from "react";
 import {
-  Area,
+  Bar,
   CartesianGrid,
   ComposedChart,
   Legend,
@@ -12,7 +12,7 @@ import {
   YAxis,
 } from "recharts";
 import { nullToZero } from "../utils/math";
-import { NormalizedStats, Stat } from "./stats";
+import { NormalizedStats } from "./stats";
 
 interface props {
   stats: NormalizedStats;
@@ -27,13 +27,24 @@ const StatsGraph: React.FC<props> = ({
   applyWeighting,
   applyPopulationScaling,
 }) => {
-  const movingAverage = calcMovingAverage(
-    stats.dates.map((date) => ({
-      date: date.asMoment,
-      val: date.totals.totalCases,
-    })),
-    7
-  );
+  const population = stats.areas
+    .map((area) => area.population)
+    .reduce((a, b) => a + b, 0);
+  const movingAverage = applyPopulationScaling
+    ? calcMovingAverage(
+        stats.dates.map((date) => ({
+          date: date.asMoment,
+          val: scaleByPopulation(date.totals.totalCases, population, 1),
+        })),
+        7
+      )
+    : calcMovingAverage(
+        stats.dates.map((date) => ({
+          date: date.asMoment,
+          val: date.totals.totalCases,
+        })),
+        7
+      );
   // Sum up the total number of tests taken in all areas
   const maxTests = stats.areas
     .map((area) => area.maxTests)
@@ -55,7 +66,13 @@ const StatsGraph: React.FC<props> = ({
       const casesKey = `${area.areaCode}Cases`;
       const deathsKey = `${area.areaCode}Deaths`;
 
-      input[casesKey] = stats.stats[key].newCases;
+      input[casesKey] = applyPopulationScaling
+        ? scaleByPopulation(
+            stats.stats[key].newCases,
+            area.population,
+            area.population / population
+          )
+        : stats.stats[key].newCases;
       input[deathsKey] = stats.stats[key].newDeaths;
     }
     return {
@@ -63,7 +80,6 @@ const StatsGraph: React.FC<props> = ({
       ...input,
     };
   });
-  console.log(data);
 
   // const movingAverage = calcMovingAverage(stats, (s: Stats) => s.newCases, 7);
   // const movingAvPopScaled = calcMovingAverage(
@@ -122,14 +138,12 @@ const StatsGraph: React.FC<props> = ({
         {stats.areas.map((area) => {
           const colour = randomColour();
           return (
-            <Area
+            <Bar
               key={`${area.areaCode}Cases`}
               yAxisId="left"
-              type="monotone"
               dataKey={`${area.areaCode}Cases`}
               stroke={colour}
               fill={colour}
-              dot={false}
               name={`${area.areaName} (Cases)`}
               stackId="1"
             />
@@ -155,6 +169,7 @@ const StatsGraph: React.FC<props> = ({
               stroke="#dc0000de"
               dot={false}
               name={`${area.areaName} (Deaths)`}
+              strokeWidth="2"
             />
           ))}
         {applyWeighting && (
@@ -184,7 +199,7 @@ const tickFormatter = (unixTime: number): string => {
 };
 
 const calcMovingAverage = (
-  stats: { date: Moment; val: number }[],
+  stats: { date: Moment; val: number | null }[],
   days: number
 ): number[] => {
   const movingAverage = [];
@@ -200,7 +215,7 @@ const calcMovingAverage = (
     let date = stat.date;
     let j = i;
     while (j >= 0 && date.isSameOrAfter(minDate)) {
-      sum += stats[j].val;
+      sum += stats[j].val || 0;
       date = stats[j].date;
       count++;
       j--;
@@ -209,7 +224,7 @@ const calcMovingAverage = (
     date = stat.date;
     let k = i;
     while (k < stats.length && date.isSameOrBefore(maxDate)) {
-      sum += stats[k].val;
+      sum += stats[k].val || 0;
       date = stats[k].date;
       count++;
       k++;
@@ -236,12 +251,13 @@ const calcWeightedStat = (
 // give the number of X per 100,000.
 const scaleByPopulation = (
   v: number | null,
-  population: number | null
+  population: number,
+  scalingRatio: number
 ): number | null => {
-  if (v === null || population === null) {
+  if (v === null || population === 0) {
     return null;
   }
-  return (100000 * v) / population;
+  return ((100000 * v) / population) * scalingRatio;
 };
 
 export default StatsGraph;
