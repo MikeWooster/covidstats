@@ -1,4 +1,5 @@
 import moment, { Moment } from "moment";
+import { nullToZero } from "../utils/math";
 import { getNeighbouringLAs } from "./geo";
 import { geocodePostCode } from "./postCodeAPI";
 import {
@@ -25,7 +26,7 @@ export interface Stat {
 interface Area {
   areaCode: string;
   areaName: string;
-  population: number | null;
+  population: number;
   maxTests: number | null;
   stats: string[];
 }
@@ -126,7 +127,7 @@ const formatStats = (stats: StatsDataResponse[]): NormalizedStats => {
       areas[stat.areaCode] = {
         areaCode: stat.areaCode,
         areaName: stat.areaName,
-        population: null,
+        population: 0,
         maxTests: null,
         stats: [],
       };
@@ -190,92 +191,6 @@ const getMaxTests = (stats: Stat[]): number | null => {
     }
   }
   return numTests;
-};
-// aggregated will reduce the stats to a daily SUM when there are multiple days of stats.
-// we will lose some of the info - i.e. the areaType/areaName, but oh well.
-const aggregated = (stats: StatsDataResponse[]): StatsDataResponse[] => {
-  const aggregator: { [date: string]: StatsDataResponse } = {};
-  for (let i = 0; i < stats.length; i++) {
-    const stat = stats[i];
-    if (stat.date in aggregator) {
-      aggregator[stat.date].newCasesBySpecimenDate +=
-        stat.newCasesBySpecimenDate;
-
-      // New deaths can be reported as null - convert this to zero
-      aggregator[stat.date].newDeaths28DaysByPublishDate = sumVals(
-        aggregator[stat.date].newDeaths28DaysByPublishDate,
-        stat.newDeaths28DaysByPublishDate
-      );
-
-      aggregator[stat.date].newDeaths28DaysByDeathDate = sumVals(
-        aggregator[stat.date].newDeaths28DaysByDeathDate,
-        stat.newDeaths28DaysByDeathDate
-      );
-
-      aggregator[stat.date].newPCRTestsByPublishDate = sumVals(
-        aggregator[stat.date].newPCRTestsByPublishDate,
-        stat.newPCRTestsByPublishDate
-      );
-
-      aggregator[
-        stat.date
-      ].cumCasesByPublishDateRate = calcNewCumCasesByPublishDateRate(
-        aggregator[stat.date],
-        stat
-      );
-
-      aggregator[stat.date].cumCasesByPublishDate = sumVals(
-        aggregator[stat.date].cumCasesByPublishDate,
-        stat.cumCasesByPublishDate
-      );
-    } else {
-      aggregator[stat.date] = {
-        ...stat,
-        newDeaths28DaysByPublishDate: nullToZero(
-          stat.newDeaths28DaysByPublishDate
-        ),
-      };
-    }
-  }
-  return Object.values(aggregator);
-};
-
-const nullToZero = (v: number | null): number => {
-  return v === null ? 0 : v;
-};
-
-const sumVals = (a: number | null, b: number | null): number | null => {
-  if (a === null && b === null) {
-    return null;
-  }
-  if (a === null) {
-    return b;
-  }
-  if (b === null) {
-    return a;
-  }
-  return a + b;
-};
-
-const calcNewCumCasesByPublishDateRate = (
-  a: StatsDataResponse,
-  b: StatsDataResponse
-): number | null => {
-  const aPop = calculatePopulation(a);
-  const bPop = calculatePopulation(b);
-
-  if (aPop === null) {
-    return b.cumCasesByPublishDateRate;
-  }
-  if (bPop === null) {
-    return a.cumCasesByPublishDateRate;
-  }
-
-  const newTotal =
-    (a.cumCasesByPublishDate as number) + (b.cumCasesByPublishDate as number);
-  const newPop = aPop + bPop;
-
-  return (100000 * newTotal) / newPop;
 };
 
 const calculatePopulation = (s: StatsDataResponse): number | null => {
