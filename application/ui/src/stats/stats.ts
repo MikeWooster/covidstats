@@ -34,7 +34,11 @@ interface Date {
   asString: string;
   asMoment: Moment;
   stats: string[];
-  totals: { totalDeaths: number; totalCases: number };
+  totals: {
+    totalDeaths: number;
+    totalCases: number;
+    totalTests: number | null;
+  };
 }
 
 export interface NormalizedStats {
@@ -138,7 +142,7 @@ const formatStats = (stats: StatsDataResponse[]): NormalizedStats => {
         asString: stat.date,
         asMoment: ns.stats[statKey].date,
         stats: [],
-        totals: { totalCases: 0, totalDeaths: 0 },
+        totals: { totalCases: 0, totalDeaths: 0, totalTests: 0 },
       };
     }
     dates[stat.date].stats.push(statKey);
@@ -151,7 +155,7 @@ const formatStats = (stats: StatsDataResponse[]): NormalizedStats => {
     );
   }
 
-  // Calculate the total cases per day
+  // Calculate the daily totals
   for (let key in dates) {
     dates[key].totals.totalCases = dates[key].stats
       .map((st) => ns.stats[st].newCases)
@@ -159,6 +163,9 @@ const formatStats = (stats: StatsDataResponse[]): NormalizedStats => {
     dates[key].totals.totalDeaths = dates[key].stats
       .map((st) => ns.stats[st].newDeaths)
       .reduce((a, b) => a + b, 0);
+    dates[key].totals.totalTests = dates[key].stats
+      .map((st) => ns.stats[st].newTests)
+      .reduce((a, b) => (a || 0) + (b || 0), 0);
   }
 
   // Add the dates/areas to the normalized stats

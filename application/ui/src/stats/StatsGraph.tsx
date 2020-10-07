@@ -11,6 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { nullToZero } from "../utils/math";
 import { NormalizedStats, Stat } from "./stats";
 
 interface props {
@@ -33,10 +34,19 @@ const StatsGraph: React.FC<props> = ({
     })),
     7
   );
+  // Sum up the total number of tests taken in all areas
+  const maxTests = stats.areas
+    .map((area) => area.maxTests)
+    .reduce((a, b) => nullToZero(a) + nullToZero(b), 0);
 
   const data = stats.dates.map((date, i) => {
     const input: { [key: string]: number | null } = {};
     input.casesMA = movingAverage[i];
+    input.weightedCases = calcWeightedStat(
+      date.totals.totalCases,
+      date.totals.totalTests,
+      maxTests
+    );
 
     for (let i = 0; i < stats.areas.length; i++) {
       const area = stats.areas[i];
@@ -53,6 +63,7 @@ const StatsGraph: React.FC<props> = ({
       ...input,
     };
   });
+  console.log(data);
 
   // const movingAverage = calcMovingAverage(stats, (s: Stats) => s.newCases, 7);
   // const movingAvPopScaled = calcMovingAverage(
@@ -146,18 +157,18 @@ const StatsGraph: React.FC<props> = ({
               name={`${area.areaName} (Deaths)`}
             />
           ))}
-        {/* {applyWeighting && (
+        {applyWeighting && (
           <Line
             yAxisId="left"
             type="monotone"
-            dataKey="weightedStats"
+            dataKey="weightedCases"
             stroke="#923f0a"
             strokeWidth={3}
             strokeDasharray={"2 2"}
             dot={false}
             name="Weighted Cases"
           />
-        )} */}
+        )}
       </ComposedChart>
     </ResponsiveContainer>
   );
@@ -208,16 +219,17 @@ const calcMovingAverage = (
   return movingAverage;
 };
 
-const calcWeightedStats = (
-  stat: Stat,
+const calcWeightedStat = (
+  val: number,
+  tests: number | null,
   maxTests: number | null
 ): number | null => {
-  if (maxTests === null || stat.newTests === null) {
+  if (maxTests === null || tests === null || tests === 0) {
     // unable to apply any weighting
     return null;
   }
-  const ratio = maxTests / stat.newTests;
-  return stat.newCases * ratio;
+  const ratio = maxTests / tests;
+  return val * ratio;
 };
 
 // scaleByPopulation takes the number and applies a scaling to
