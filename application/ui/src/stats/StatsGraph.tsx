@@ -2,6 +2,7 @@ import moment, { Moment } from "moment";
 import React from "react";
 import {
   Bar,
+  Brush,
   CartesianGrid,
   ComposedChart,
   Legend,
@@ -80,22 +81,6 @@ const StatsGraph: React.FC<props> = ({
       ...input,
     };
   });
-
-  // const movingAverage = calcMovingAverage(stats, (s: Stats) => s.newCases, 7);
-  // const movingAvPopScaled = calcMovingAverage(
-  //   stats,
-  //   (s: Stats) => scaleByPopulation(s.newCases, population) || 0,
-  //   7
-  // );
-
-  // const data = stats.map((s, i) => ({
-  //   ...s,
-  //   date: s.date.toDate().getTime(),
-  //   newCasesMvgAvg: movingAverage[i],
-  //   weightedStats: calcWeightedStats(s, maxTests),
-  //   populationScaledCases: scaleByPopulation(s.newCases, population),
-  //   populationScaledCasesMvgAvg: movingAvPopScaled[i],
-  // }));
 
   return (
     <ResponsiveContainer width="100%" height={600}>
@@ -184,6 +169,7 @@ const StatsGraph: React.FC<props> = ({
             name="Weighted Cases"
           />
         )}
+        <Brush />
       </ComposedChart>
     </ResponsiveContainer>
   );
