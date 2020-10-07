@@ -6,18 +6,19 @@ import GraphOptions from "./GraphOptionsComponent";
 import PostCodeSearch from "./PostCodeSearchComponent";
 import {
   AreaTypes,
+  EMPTY_STATS,
   getNations,
   getRegions,
   getStats,
   getStatsForPostCode,
-  Stats,
+  NormalizedStats,
 } from "./stats";
 import StatsComponent from "./StatsComponent";
 import StatsGraph from "./StatsGraph";
 
 const StatsContainer: React.FC<{}> = () => {
   const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState<Stats[]>([]);
+  const [stats, setStats] = useState<NormalizedStats>(EMPTY_STATS);
   const [areaType, setAreaType] = useState(AreaTypes.overview);
   const [refinedArea, setRefinedArea] = useState("");
   const [searchRadius, setSearchRadius] = useState<number | null>(25);
@@ -83,7 +84,7 @@ const StatsContainer: React.FC<{}> = () => {
       regions={regions}
       setRefinedArea={(v: string) => {
         if (v === "") {
-          setStats([]);
+          setStats(EMPTY_STATS);
         }
         setRefinedArea(v);
       }}
