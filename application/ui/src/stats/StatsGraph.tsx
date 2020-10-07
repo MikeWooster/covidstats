@@ -1,10 +1,11 @@
 import moment, { Moment } from "moment";
 import React from "react";
 import {
+  Area,
   CartesianGrid,
+  ComposedChart,
   Legend,
   Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -71,7 +72,7 @@ const StatsGraph: React.FC<props> = ({
 
   return (
     <ResponsiveContainer width="100%" height={600}>
-      <LineChart
+      <ComposedChart
         data={data}
         margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
       >
@@ -107,37 +108,30 @@ const StatsGraph: React.FC<props> = ({
           labelFormatter={(unixTime) => moment(unixTime).format("YYYY-MM-DD")}
         />
         <Legend />
-        {stats.areas.map((area) => (
-          <Line
-            key={`${area.areaCode}Cases`}
-            yAxisId="left"
-            type="monotone"
-            dataKey={`${area.areaCode}Cases`}
-            stroke="#8884d8"
-            dot={false}
-            name={
-              applyPopulationScaling ? "New Cases per 100,000" : "New Cases"
-            }
-          />
-        ))}
-        {stats.areas.map((area) => (
-          <Line
-            key={`${area.areaCode}CasesMA`}
-            yAxisId="left"
-            type="monotone"
-            dataKey={`${area.areaCode}CasesMA`}
-            stroke="#1c074a"
-            dot={false}
-            name="New Cases (moving average)"
-          />
-        ))}
+        {stats.areas.map((area) => {
+          const colour = randomColour();
+          return (
+            <Area
+              key={`${area.areaCode}Cases`}
+              yAxisId="left"
+              type="monotone"
+              dataKey={`${area.areaCode}Cases`}
+              stroke={colour}
+              fill={colour}
+              dot={false}
+              name={`${area.areaName} (Cases)`}
+              stackId="1"
+            />
+          );
+        })}
         <Line
           yAxisId="left"
           type="monotone"
           dataKey={"casesMA"}
           stroke="#1c074a"
           dot={false}
-          name="New Cases (moving average)"
+          name="Moving Average (Cases)"
+          strokeWidth="2"
         />
         )
         {displayDeaths &&
@@ -149,7 +143,7 @@ const StatsGraph: React.FC<props> = ({
               dataKey={`${area.areaCode}Deaths`}
               stroke="#dc0000de"
               dot={false}
-              name="Deaths"
+              name={`${area.areaName} (Deaths)`}
             />
           ))}
         {/* {applyWeighting && (
@@ -164,9 +158,14 @@ const StatsGraph: React.FC<props> = ({
             name="Weighted Cases"
           />
         )} */}
-      </LineChart>
+      </ComposedChart>
     </ResponsiveContainer>
   );
+};
+
+const randomColour = (): string => {
+  const val = Math.floor(Math.random() * 16777215).toString(16);
+  return `#${val}`;
 };
 
 const tickFormatter = (unixTime: number): string => {
