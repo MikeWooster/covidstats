@@ -215,14 +215,26 @@ const tickFormatter = (unixTime: number): string => {
 const calcMovingAverage = (
   stats: { date: Moment; val: number | null }[],
   days: number
-): number[] => {
-  const movingAverage = [];
+): (number | null)[] => {
+  const movingAverage: (number | null)[] = [];
+  if (stats.length === 0) {
+    return movingAverage;
+  }
   const windowR = days / 2;
+  const firstDate = stats[0].date;
+  const lastDate = stats[stats.length - 1].date;
+
   for (let i = 0; i < stats.length; i++) {
     const stat = stats[i];
     const minDate = stat.date.clone().subtract(windowR, "d");
     const maxDate = stat.date.clone().add(windowR, "d");
 
+    // Ensure the moving average only accounts for dates that have
+    // available data in the window.
+    if (minDate.isBefore(firstDate) || maxDate.isAfter(lastDate)) {
+      movingAverage.push(null);
+      continue;
+    }
     let sum = 0;
     let count = 0;
 
