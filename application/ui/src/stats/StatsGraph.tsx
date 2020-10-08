@@ -12,6 +12,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { hexToRgb, rgbToHex } from "../utils/colours";
 import { nullToZero } from "../utils/math";
 import { NormalizedStats } from "./stats";
 
@@ -120,8 +121,13 @@ const StatsGraph: React.FC<props> = ({
           labelFormatter={(unixTime) => moment(unixTime).format("YYYY-MM-DD")}
         />
         <Legend />
-        {stats.areas.map((area) => {
-          const colour = randomColour();
+        {stats.areas.map((area, i) => {
+          const colour = selectColour(
+            i,
+            stats.areas.length,
+            "#cec0ec",
+            "#1b034e"
+          );
           return (
             <Bar
               key={`${area.areaCode}Cases`}
@@ -175,9 +181,31 @@ const StatsGraph: React.FC<props> = ({
   );
 };
 
-const randomColour = (): string => {
-  const val = Math.floor(Math.random() * 16777215).toString(16);
-  return `#${val}`;
+const selectColour = (
+  i: number,
+  total: number,
+  startColour: string,
+  endColour: string
+): string => {
+  const factor = i / total;
+  return interpolateColor(startColour, endColour, factor);
+};
+
+const interpolateColor = (
+  startColour: string,
+  endColour: string,
+  factor: number
+): string => {
+  const { r: r1, g: g1, b: b1 } = hexToRgb(startColour);
+  const { r: r2, g: g2, b: b2 } = hexToRgb(endColour);
+  console.log(startColour, r1, g1, b1);
+  console.log(endColour, r2, g2, b2);
+  const r3 = Math.round(r1 + factor * (r2 - r1));
+  const g3 = Math.round(g1 + factor * (g2 - g1));
+  const b3 = Math.round(b1 + factor * (b2 - b1));
+  const v = rgbToHex(r3, g3, b3);
+  console.log(v);
+  return v;
 };
 
 const tickFormatter = (unixTime: number): string => {
