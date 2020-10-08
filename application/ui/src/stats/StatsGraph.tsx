@@ -7,6 +7,7 @@ import {
   ComposedChart,
   Legend,
   Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -175,7 +176,26 @@ const StatsGraph: React.FC<props> = ({
             name="Weighted Cases"
           />
         )}
-        <Brush />
+        <Brush dataKey="date" tickFormatter={tickFormatter}>
+          <LineChart compact={false}>
+            <CartesianGrid strokeDasharray="0 0" />
+            <XAxis
+              dataKey="date"
+              type="number"
+              scale="time"
+              domain={["dataMin", "dataMax"]}
+              hide={true}
+            />
+            <YAxis domain={["auto", "auto"]} hide={true} />
+            <Line
+              type="monotone"
+              dataKey={"casesMA"}
+              stroke="#1c074a"
+              dot={false}
+              strokeWidth="2"
+            />
+          </LineChart>
+        </Brush>
       </ComposedChart>
     </ResponsiveContainer>
   );
