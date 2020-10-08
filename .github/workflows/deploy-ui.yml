@@ -3,10 +3,10 @@ on:
     paths:
       - "application/ui/**"
   push:
-    branches:
-      - main
     paths:
       - "application/ui/**"
+    branches:
+      - master
 
 defaults:
   run:
