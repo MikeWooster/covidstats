@@ -33,18 +33,6 @@ interface StatsResponse {
   };
 }
 
-export const fetchAllRegionStatsForDate = async (
-  date: string
-): Promise<StatsDataResponse[]> => {
-  const filters: { [key: string]: string } = {
-    date: date,
-    areaType: AreaTypes.region,
-  };
-
-  const url = buildURL(filters);
-  return await paginate(url);
-};
-
 export const fetchStats = async (
   areaType: string,
   areaName: string
