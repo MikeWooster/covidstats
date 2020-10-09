@@ -2,12 +2,7 @@ import moment, { Moment } from "moment";
 import { nullToZero } from "../utils/math";
 import { getNeighbouringLAs } from "./geo";
 import { geocodePostCode } from "./postCodeAPI";
-import {
-  fetchAllRegionStatsForDate,
-  fetchStats,
-  fetchStatsForLTLAs,
-  StatsDataResponse,
-} from "./statsAPI";
+import { fetchStats, fetchStatsForLTLAs, StatsDataResponse } from "./statsAPI";
 
 export enum AreaTypes {
   overview = "overview",
@@ -59,12 +54,17 @@ export const getNations = async (): Promise<string[]> => {
 };
 
 export const getRegions = async (): Promise<string[]> => {
-  const data = await fetchAllRegionStatsForDate("2020-09-01");
-  const regions = data
-    .filter((p) => p.areaType === AreaTypes.region)
-    .map((p) => p.areaName);
-  console.log(regions);
-  return regions;
+  return Promise.resolve([
+    "East Midlands",
+    "East of England",
+    "London",
+    "North East",
+    "North West",
+    "South East",
+    "South West",
+    "West Midlands",
+    "Yorkshire and The Humber",
+  ]);
 };
 
 export const getStats = async (
