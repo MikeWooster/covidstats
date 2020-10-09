@@ -63,6 +63,7 @@ export const getRegions = async (): Promise<string[]> => {
   const regions = data
     .filter((p) => p.areaType === AreaTypes.region)
     .map((p) => p.areaName);
+  console.log(regions);
   return regions;
 };
 
@@ -115,10 +116,19 @@ const formatStats = (stats: StatsDataResponse[]): NormalizedStats => {
     }
     areaType = stat.areaType;
 
+    // Some metrics are not available for specific areaType values.
+    // For instance, we have newCasesByPublishDate and
+    // cumCasesByPublishDate only available for areaType=nation but
+    // not for region,utla, or ltla. Conversely, we have
+    // newCasesBySpecimenDate and cumCasesBySpecimenDate available
+    // for region, utla, and ltla but not for nation.
+
     const statKey = `${stat.date}-${stat.areaCode}`;
     ns.stats[statKey] = {
       date: moment(stat.date, "YYYY-MM-DD"),
-      newCases: stat.newCasesBySpecimenDate,
+      newCases: ["overview", "nation"].includes(areaType)
+        ? stat.newCasesByPublishDate
+        : stat.newCasesBySpecimenDate,
       newDeaths: nullToZero(stat.newDeaths28DaysByDeathDate),
       newTests: stat.newPCRTestsByPublishDate,
     };
