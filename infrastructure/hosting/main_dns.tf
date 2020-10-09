@@ -35,8 +35,8 @@ resource "aws_route53_record" "covidstats_www_redirect" {
 
   alias {
     evaluate_target_health = false
-    name                   = aws_s3_bucket.redirect_www.website_domain
-    zone_id                = aws_s3_bucket.redirect_www.hosted_zone_id
+    name                   = aws_cloudfront_distribution.redirect_www.domain_name
+    zone_id                = aws_cloudfront_distribution.redirect_www.hosted_zone_id
   }
 }
 
