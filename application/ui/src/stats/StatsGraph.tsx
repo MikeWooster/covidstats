@@ -218,14 +218,11 @@ const interpolateColor = (
 ): string => {
   const { r: r1, g: g1, b: b1 } = hexToRgb(startColour);
   const { r: r2, g: g2, b: b2 } = hexToRgb(endColour);
-  console.log(startColour, r1, g1, b1);
-  console.log(endColour, r2, g2, b2);
+
   const r3 = Math.round(r1 + factor * (r2 - r1));
   const g3 = Math.round(g1 + factor * (g2 - g1));
   const b3 = Math.round(b1 + factor * (b2 - b1));
-  const v = rgbToHex(r3, g3, b3);
-  console.log(v);
-  return v;
+  return rgbToHex(r3, g3, b3);
 };
 
 const tickFormatter = (unixTime: number): string => {
