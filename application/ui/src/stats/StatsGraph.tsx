@@ -30,6 +30,12 @@ const StatsGraph: React.FC<props> = ({
   applyWeighting,
   applyPopulationScaling,
 }) => {
+  const winWidth =
+    window.innerWidth ||
+    document.documentElement.clientWidth ||
+    document.body.clientWidth;
+  const onMobile = winWidth < 800;
+
   const population = stats.areas
     .map((area) => area.population)
     .reduce((a, b) => a + b, 0);
@@ -76,7 +82,13 @@ const StatsGraph: React.FC<props> = ({
             area.population / population
           )
         : stats.stats[key].newCases;
-      input[deathsKey] = stats.stats[key].newDeaths;
+      input[deathsKey] = applyPopulationScaling
+        ? scaleByPopulation(
+            stats.stats[key].newDeaths,
+            area.population,
+            area.population / population
+          )
+        : stats.stats[key].newDeaths;
     }
     return {
       date: date.asMoment.toDate().getTime(),
@@ -85,19 +97,21 @@ const StatsGraph: React.FC<props> = ({
   });
 
   return (
-    <ResponsiveContainer width="100%" height={600}>
+    <ResponsiveContainer width="100%" height="100%">
       <ComposedChart
         data={data}
-        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+        margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
       >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           dataKey="date"
           type="number"
           domain={["dataMin", "dataMax"]}
+          scale="linear"
           tickFormatter={tickFormatter}
         />
         <YAxis
+          hide={onMobile}
           yAxisId="left"
           label={{
             value: applyPopulationScaling ? "Cases per 100,000" : "Cases",
@@ -108,10 +122,11 @@ const StatsGraph: React.FC<props> = ({
         />
         {displayDeaths && (
           <YAxis
+            hide={onMobile}
             yAxisId="right"
             orientation="right"
             label={{
-              value: "Deaths",
+              value: applyPopulationScaling ? "Deaths per 100,000" : "Deaths",
               position: "insideRight",
               angle: 90,
               dy: -20,

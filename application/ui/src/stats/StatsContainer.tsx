@@ -4,6 +4,7 @@ import AreaOptionsSelect from "./AreaOptionsSelectComponent";
 import AreaRefinementSearch from "./AreaRefinementSearchComponent";
 import GraphOptions from "./GraphOptionsComponent";
 import PostCodeSearch from "./PostCodeSearchComponent";
+import SettingsModal from "./SettingsModal";
 import {
   AreaTypes,
   EMPTY_STATS,
@@ -22,6 +23,7 @@ const StatsContainer: React.FC<{}> = () => {
   const [areaType, setAreaType] = useState(AreaTypes.overview);
   const [refinedArea, setRefinedArea] = useState("");
   const [searchRadius, setSearchRadius] = useState<number | null>(25);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const [err, setErr] = useState<Error | null>(null);
   const [nations, setNations] = useState<string[]>([]);
@@ -143,11 +145,24 @@ const StatsContainer: React.FC<{}> = () => {
     />
   );
 
+  const settingsModal = (
+    <SettingsModal
+      setModalOpen={(v: boolean) => setModalOpen(v)}
+      modalOpen={modalOpen}
+      showApplyWeighting={showApplyWeighting}
+      applyWeighting={applyWeighting}
+      setApplyWeighting={setApplyWeighting}
+      applyPopulationScaling={applyPopulationScaling}
+      setApplyPopulationScaling={setApplyPopulationScaling}
+    />
+  );
+
   return (
     <StatsComponent
       areaOptions={areaOptionsComponent}
       searchRefinement={searchRefinementComponent}
       graph={graph}
+      settingsModal={settingsModal}
       graphOptions={graphOptionsComponent}
       err={errComponent}
       loading={loading}

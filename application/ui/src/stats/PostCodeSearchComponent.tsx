@@ -25,9 +25,10 @@ const PostCodeSearch: React.FC<props> = ({
 }) => {
   return (
     <div>
-      Enter Post Code:{" "}
+      Post Code:{" "}
       <Input
         size={"mini"}
+        style={{ width: 60 }}
         disabled={loading}
         value={postCode}
         onChange={(e, { value }) => {
@@ -48,6 +49,7 @@ const PostCodeSearch: React.FC<props> = ({
       Within{" "}
       <Input
         size={"mini"}
+        style={{ width: 40 }}
         disabled={loading}
         value={searchRadius === null ? "" : searchRadius}
         onChange={(e, { value }) => {
@@ -71,7 +73,7 @@ const PostCodeSearch: React.FC<props> = ({
           );
         }}
       />{" "}
-      Kilometers
+      km
       <InfoPopup
         header="Post Code Search"
         content={
