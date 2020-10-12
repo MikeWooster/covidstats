@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Container,
-  Divider,
-  Grid,
-  Header,
-  Loader,
-  Segment,
-} from "semantic-ui-react";
+import { Container, Grid, Header, Loader, Segment } from "semantic-ui-react";
 
 interface props {
   areaOptions: React.ReactElement;
