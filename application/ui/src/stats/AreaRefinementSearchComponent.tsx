@@ -52,7 +52,6 @@ const AreaRefinementSearch: React.FC<props> = ({
       <Dropdown
         id="areaRefinementSearchInput"
         inline
-        search
         disabled={disabled}
         options={searchOptions}
         onChange={(e, { value }) => {
