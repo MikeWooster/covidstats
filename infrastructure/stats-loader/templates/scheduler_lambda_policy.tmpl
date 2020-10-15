@@ -1,0 +1,15 @@
+{
+  "Version": "2012-10-17",
+  "Id": "PolicyForS3BucketAccess",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "sqs:SendMessage"
+      ],
+      "Resource": [
+        "${sqs_arn}"
+      ]
+    }
+  ]
+}

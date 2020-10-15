@@ -1,0 +1,26 @@
+{
+  "Version": "2012-10-17",
+  "Id": "PolicyForS3BucketAccess",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject"
+      ],
+      "Resource": [
+        "${bucket_arn}/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "sqs:ReceiveMessage",
+        "sqs:DeleteMessage",
+        "sqs:GetQueueAttributes"
+      ],
+      "Resource": [
+        "${sqs_arn}"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+on:
+  workflow_dispatch:
+    paths:
+      - "application/stats-loader/etl/**"
+      - "application/stats-loader/scheduler/**"
+
+  push:
+    paths:
+      - "application/stats-loader/etl/**"
+      - "application/stats-loader/scheduler/**"
+    branches:
+      - master
+
+jobs:
+  deploy:
+    name: Deploy Lambdas
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository under $GITHUB_WORKSPACE
+        uses: actions/checkout@v2
+      - name: using go to build project
+        uses: actions/setup-go@v2
+        with:
+          go-version: "^1.15.2"
+      - name: Test ETL Lambda
+        working-directory: application/etl
+        run: |
+          go test
+      - name: Test Scheduler Lambda
+        working-directory: application/scheduler
+        run: |
+          go test
+      - name: Create aws credentials
+        run: |
+          mkdir ~/.aws
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
+      - name: Deploy Lambdas
+        run: |
+          bash scripts/build_and_apply_lambdas.sh

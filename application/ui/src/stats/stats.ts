@@ -1,6 +1,11 @@
 import moment, { Moment } from "moment";
 import { nullToZero } from "../utils/math";
 import { getNeighbouringLAs } from "./geo";
+import {
+  fetchLoadedStats,
+  fetchLoadedStatsForLTLAs,
+  LoadedResponse,
+} from "./loadedStatsAPI";
 import { geocodePostCode } from "./postCodeAPI";
 import { fetchStats, fetchStatsForLTLAs, StatsDataResponse } from "./statsAPI";
 
@@ -82,6 +87,19 @@ export const getStats = async (
   return formatStats(stats);
 };
 
+// getLoadedStats returns stats from our local stored stats.
+export const getLoadedStats = async (
+  areaType: AreaTypes,
+  refinedArea: string
+): Promise<NormalizedStats> => {
+  if (areaType === AreaTypes.overview) {
+    refinedArea = "United Kingdom";
+  }
+
+  const stats = await fetchLoadedStats(areaType, refinedArea);
+  return formatLoadedStats([stats]);
+};
+
 export const getStatsForPostCode = async (
   postCode: string,
   r: number
@@ -96,6 +114,87 @@ export const getStatsForPostCode = async (
   const areaCodes = getNeighbouringLAs(lon, lat, r_meters);
   const stats = await fetchStatsForLTLAs(areaCodes);
   return formatStats(stats);
+};
+
+// getLoadedStatsForPostCode gets ltla data from our stored stats.
+export const getLoadedStatsForPostCode = async (
+  postCode: string,
+  r: number
+): Promise<NormalizedStats> => {
+  if (r >= 100) {
+    throw new Error(
+      "Search distance is too large, try reducing the search, or change the data display type."
+    );
+  }
+  const r_meters = r * 1000;
+  const { lon, lat } = await geocodePostCode(postCode);
+  const areaCodes = getNeighbouringLAs(lon, lat, r_meters);
+  const stats = await fetchLoadedStatsForLTLAs(areaCodes);
+  return formatLoadedStats(stats);
+};
+
+// formatLoadedStats maps the stored stats into the normalized stats
+// format required for graphing
+const formatLoadedStats = (stats: LoadedResponse[]): NormalizedStats => {
+  const ns: NormalizedStats = { stats: {}, areas: [], dates: [] };
+  const areas: { [key: string]: Area } = {};
+  const dates: { [key: string]: Date } = {};
+
+  for (let i = 0; i < stats.length; i++) {
+    const areaStat = stats[i];
+    areas[areaStat.areaCode] = {
+      areaCode: areaStat.areaCode,
+      areaName: areaStat.areaName,
+      population: areaStat.population,
+      maxTests: areaStat.maxTests,
+      stats: [],
+    };
+
+    for (let j = 0; j < areaStat.stats.length; j++) {
+      const stat = areaStat.stats[j];
+      const statKey = `${stat.date}-${areaStat.areaCode}`;
+      ns.stats[statKey] = {
+        date: moment(stat.date, "YYYY-MM-DD"),
+        newCases: stat.newCases,
+        newDeaths: stat.newDeaths,
+        newTests: stat.newTests,
+      };
+
+      areas[areaStat.areaCode].stats.push(statKey);
+
+      if (!(stat.date in dates)) {
+        dates[stat.date] = {
+          asString: stat.date,
+          asMoment: ns.stats[statKey].date,
+          stats: [],
+          totals: { totalCases: 0, totalDeaths: 0, totalTests: 0 },
+        };
+      }
+      dates[stat.date].stats.push(statKey);
+    }
+  }
+
+  // Calculate the daily totals
+  for (let key in dates) {
+    dates[key].totals.totalCases = dates[key].stats
+      .map((st) => ns.stats[st].newCases)
+      .reduce((a, b) => a + b, 0);
+    dates[key].totals.totalDeaths = dates[key].stats
+      .map((st) => ns.stats[st].newDeaths)
+      .reduce((a, b) => a + b, 0);
+    dates[key].totals.totalTests = dates[key].stats
+      .map((st) => ns.stats[st].newTests)
+      .reduce((a, b) => (a || 0) + (b || 0), 0);
+  }
+
+  // Add the dates/areas to the normalized stats
+  // Dates must also be sorted oldest to newest.
+  ns.dates = Object.values(dates).sort((a, b) =>
+    a.asMoment.isBefore(b.asMoment) ? -1 : 1
+  );
+  ns.areas = Object.values(areas);
+
+  return ns;
 };
 
 const formatStats = (stats: StatsDataResponse[]): NormalizedStats => {
@@ -129,7 +228,11 @@ const formatStats = (stats: StatsDataResponse[]): NormalizedStats => {
       newCases: ["overview", "nation"].includes(areaType)
         ? stat.newCasesByPublishDate
         : stat.newCasesBySpecimenDate,
-      newDeaths: nullToZero(stat.newDeaths28DaysByDeathDate),
+      newDeaths: nullToZero(
+        ["overview", "nation"].includes(areaType)
+          ? stat.newDeaths28DaysByPublishDate
+          : stat.newDeaths28DaysByDeathDate
+      ),
       newTests: stat.newPCRTestsByPublishDate,
     };
 
