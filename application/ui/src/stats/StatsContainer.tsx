@@ -8,6 +8,8 @@ import SettingsModal from "./SettingsModal";
 import {
   AreaTypes,
   EMPTY_STATS,
+  getLoadedStats,
+  getLoadedStatsForPostCode,
   getNations,
   getRegions,
   getStats,
@@ -37,7 +39,8 @@ const StatsContainer: React.FC<{}> = () => {
   const getAndSetStats = (areaType: AreaTypes, refinedArea: string) => {
     setLoading(true);
     setErr(null);
-    getStats(areaType, refinedArea)
+    const statsGetter = true ? getLoadedStats : getStats;
+    statsGetter(areaType, refinedArea)
       .then((stats) => {
         setLoading(false);
         setStats(stats);
@@ -54,7 +57,8 @@ const StatsContainer: React.FC<{}> = () => {
       return;
     }
     setLoading(true);
-    getStatsForPostCode(postCode, radius)
+    const statsGetter = true ? getLoadedStatsForPostCode : getStatsForPostCode;
+    statsGetter(postCode, radius)
       .then((stats) => {
         setLoading(false);
         setStats(stats);

@@ -71,7 +71,9 @@ const StatsGraph: React.FC<props> = ({
     for (let i = 0; i < stats.areas.length; i++) {
       const area = stats.areas[i];
       const key = `${date.asString}-${area.areaCode}`;
-
+      if (!(key in stats.stats)) {
+        continue;
+      }
       const casesKey = `${area.areaCode}Cases`;
       const deathsKey = `${area.areaCode}Deaths`;
 
