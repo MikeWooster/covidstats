@@ -4,19 +4,26 @@ jobs:
   test:
     name: Test Lambdas
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository under $GITHUB_WORKSPACE
-        uses: actions/checkout@v2
-      - name: using go to build project
+      - name: Set up Go 1.15.x
         uses: actions/setup-go@v2
         with:
-          go-version: "^1.15.2"
+          go-version: ^1.15
+        id: go
+
+      - name: Checkout repository under $GITHUB_WORKSPACE
+        uses: actions/checkout@v2
+
       - name: Test ETL Lambda
-        working-directory: application/etl
+        working-directory: application/stats-loader/etl
         run: |
+          echo $(pwd) 
+          go build
           go test
+
       - name: Test Scheduler Lambda
-        working-directory: application/scheduler
+        working-directory: application/stats-loader/scheduler
         run: |
+          echo $(pwd)
+          go build
           go test
