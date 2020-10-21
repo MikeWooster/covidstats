@@ -84,7 +84,7 @@ func NationLoader(s DataResponse) Stat {
 	return Stat{
 		Date:      s.Date,
 		NewCases:  s.NewCasesByPublishDate,
-		NewDeaths: parseInt(s.NewDeaths28DaysByDeathDate),
+		NewDeaths: parseInt(s.NewDeaths28DaysByPublishDate),
 		NewTests:  parseInt(s.NewPCRTestsByPublishDate),
 	}
 }
