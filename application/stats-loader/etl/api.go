@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
 const baseURL = "https://api.coronavirus.data.gov.uk"
@@ -49,7 +50,7 @@ type StatsAPI struct {
 
 func NewStatsAPI() *StatsAPI {
 	api := &StatsAPI{
-		http: &HTTP{http: &http.Client{}},
+		http: &HTTP{http: &http.Client{Timeout: 2 * time.Second}},
 	}
 	return api
 }

@@ -19,24 +19,35 @@ jobs:
     steps:
       - name: Checkout repository under $GITHUB_WORKSPACE
         uses: actions/checkout@v2
+
       - name: using go to build project
         uses: actions/setup-go@v2
         with:
-          go-version: "^1.15.2"
-      - name: Test ETL Lambda
-        working-directory: application/etl
-        run: |
-          go test
-      - name: Test Scheduler Lambda
-        working-directory: application/scheduler
-        run: |
-          go test
+          go-version: ^1.15
+        id: go
+
       - name: Create aws credentials
         run: |
           mkdir ~/.aws
           echo "[default]" > ~/.aws/credentials
+          echo "region = eu-west-1" >> ~/.aws/credentials
           echo "aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" >> ~/.aws/credentials
           echo "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
-      - name: Deploy Lambdas
+
+      - name: Test & Deploy ETL Lambda
+        working-directory: application/stats-loader/etl
         run: |
-          bash scripts/build_and_apply_lambdas.sh
+          echo $(pwd) 
+          go build
+          go test
+          zip stats_etl_lambda.zip stats_etl
+          aws lambda update-function-code --function-name ${{secrets.STATS_ETL_LAMBDA_ARN}} --zip-file fileb://stats_etl_lambda.zip
+
+      - name: Test & Deploy Scheduler Lambda
+        working-directory: application/stats-loader/scheduler
+        run: |
+          echo $(pwd)
+          go build
+          go test
+          zip scheduler_lambda.zip scheduler
+          aws lambda update-function-code --function-name ${{secrets.SCHEDULER_LAMBDA_ARN}} --zip-file fileb://scheduler_lambda.zip
