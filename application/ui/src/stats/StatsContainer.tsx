@@ -39,7 +39,7 @@ const StatsContainer: React.FC<{}> = () => {
   const getAndSetStats = (areaType: AreaTypes, refinedArea: string) => {
     setLoading(true);
     setErr(null);
-    const statsGetter = true ? getLoadedStats : getStats;
+    const statsGetter = false ? getLoadedStats : getStats;
     statsGetter(areaType, refinedArea)
       .then((stats) => {
         setLoading(false);
