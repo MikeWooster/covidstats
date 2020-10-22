@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Segment } from "semantic-ui-react";
+import { Settings } from "../settings";
 import AreaOptionsSelect from "./AreaOptionsSelectComponent";
 import AreaRefinementSearch from "./AreaRefinementSearchComponent";
 import GraphOptions from "./GraphOptionsComponent";
@@ -19,7 +20,7 @@ import {
 import StatsComponent from "./StatsComponent";
 import StatsGraph from "./StatsGraph";
 
-const StatsContainer: React.FC<{}> = () => {
+const StatsContainer: React.FC<{ settings: Settings }> = ({ settings }) => {
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<NormalizedStats>(EMPTY_STATS);
   const [areaType, setAreaType] = useState(AreaTypes.overview);
@@ -39,7 +40,7 @@ const StatsContainer: React.FC<{}> = () => {
   const getAndSetStats = (areaType: AreaTypes, refinedArea: string) => {
     setLoading(true);
     setErr(null);
-    const statsGetter = false ? getLoadedStats : getStats;
+    const statsGetter = settings.mode === "prod" ? getLoadedStats : getStats;
     statsGetter(areaType, refinedArea)
       .then((stats) => {
         setLoading(false);
@@ -57,7 +58,10 @@ const StatsContainer: React.FC<{}> = () => {
       return;
     }
     setLoading(true);
-    const statsGetter = true ? getLoadedStatsForPostCode : getStatsForPostCode;
+    const statsGetter =
+      settings.mode === "prod"
+        ? getLoadedStatsForPostCode
+        : getStatsForPostCode;
     statsGetter(postCode, radius)
       .then((stats) => {
         setLoading(false);
@@ -79,6 +83,7 @@ const StatsContainer: React.FC<{}> = () => {
     getAndSetStats(AreaTypes.overview, "");
     getNations().then((nations) => setNations(nations));
     getRegions().then((regions) => setRegions(regions));
+    // eslint-disable-next-line
   }, []);
 
   const areaOptionsComponent = (
