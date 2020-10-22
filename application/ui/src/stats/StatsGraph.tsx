@@ -62,11 +62,14 @@ const StatsGraph: React.FC<props> = ({
   const data = stats.dates.map((date, i) => {
     const input: { [key: string]: number | null } = {};
     input.casesMA = movingAverage[i];
-    input.weightedCases = calcWeightedStat(
+    const weightedInput = calcWeightedStat(
       date.totals.totalCases,
       date.totals.totalTests,
       maxTests
     );
+    input.weightedCases = applyPopulationScaling
+      ? scaleByPopulation(weightedInput, population, 1)
+      : weightedInput;
 
     for (let i = 0; i < stats.areas.length; i++) {
       const area = stats.areas[i];

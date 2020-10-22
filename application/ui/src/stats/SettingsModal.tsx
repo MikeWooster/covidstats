@@ -26,7 +26,7 @@ const SettingsModal: React.FC<props> = ({
       onClose={() => setModalOpen(false)}
       onOpen={() => setModalOpen(true)}
       open={modalOpen}
-      trigger={<Icon name="setting" size="large" />}
+      trigger={<Icon name="setting" size="large" link />}
     >
       <Modal.Header>Settings</Modal.Header>
       <Modal.Content image>
