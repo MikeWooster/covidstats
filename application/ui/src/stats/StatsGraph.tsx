@@ -8,6 +8,7 @@ import {
   Legend,
   Line,
   LineChart,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -54,12 +55,16 @@ const StatsGraph: React.FC<props> = ({
         })),
         7
       );
+
   // Sum up the total number of tests taken in all areas
   const maxTests = stats.areas
     .map((area) => area.maxTests)
     .reduce((a, b) => nullToZero(a) + nullToZero(b), 0);
 
-  const data = stats.dates.map((date, i) => {
+  const data: {
+    date: number;
+    [key: string]: number | null;
+  }[] = stats.dates.map((date, i) => {
     const input: { [key: string]: number | null } = {};
     input.casesMA = movingAverage[i];
     const weightedInput = calcWeightedStat(
@@ -100,6 +105,14 @@ const StatsGraph: React.FC<props> = ({
       ...input,
     };
   });
+
+  const numLatestCases = stats.areas
+    .map((area) => {
+      const casesKey = `${area.areaCode}Cases`;
+      return data[data.length - 1][casesKey];
+    })
+    .reduce((a, b) => nullToZero(a) + nullToZero(b), 0);
+  const lastDate = stats.dates[stats.dates.length - 1]?.asString;
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -194,6 +207,16 @@ const StatsGraph: React.FC<props> = ({
             strokeDasharray={"2 2"}
             dot={false}
             name="Weighted Cases"
+          />
+        )}
+        {numLatestCases && numLatestCases > 0 && (
+          <ReferenceLine
+            yAxisId="left"
+            y={numLatestCases}
+            isFront={true}
+            label={`Latest (${lastDate}): ${numLatestCases}`}
+            stroke="red"
+            strokeDasharray="3 3"
           />
         )}
         <Brush dataKey="date" tickFormatter={tickFormatter}>
