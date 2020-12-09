@@ -3,7 +3,6 @@ import { Segment } from "semantic-ui-react";
 import { Settings } from "../settings";
 import AreaOptionsSelect from "./AreaOptionsSelectComponent";
 import AreaRefinementSearch from "./AreaRefinementSearchComponent";
-import GraphOptions from "./GraphOptionsComponent";
 import PostCodeSearch from "./PostCodeSearchComponent";
 import SettingsModal from "./SettingsModal";
 import {
@@ -36,6 +35,9 @@ const StatsContainer: React.FC<{ settings: Settings }> = ({ settings }) => {
 
   const [applyWeighting, setApplyWeighting] = useState(false);
   const [applyPopulationScaling, setApplyPopulationScaling] = useState(false);
+  const [displayDeathsMovingAverage, setDisplayDeathsMovingAverage] = useState(
+    true
+  );
 
   const postCodeSearchTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
 
@@ -148,16 +150,7 @@ const StatsContainer: React.FC<{ settings: Settings }> = ({ settings }) => {
       displayDeaths={areaType !== AreaTypes.postCode}
       applyWeighting={showApplyWeighting && applyWeighting}
       applyPopulationScaling={applyPopulationScaling}
-    />
-  );
-
-  const graphOptionsComponent = (
-    <GraphOptions
-      showApplyWeighting={showApplyWeighting}
-      applyWeighting={applyWeighting}
-      setApplyWeighting={(v: boolean) => setApplyWeighting(v)}
-      applyPopulationScaling={applyPopulationScaling}
-      setApplyPopulationScaling={(v: boolean) => setApplyPopulationScaling(v)}
+      displayDeathsMovingAverage={displayDeathsMovingAverage}
     />
   );
 
@@ -170,6 +163,8 @@ const StatsContainer: React.FC<{ settings: Settings }> = ({ settings }) => {
       setApplyWeighting={setApplyWeighting}
       applyPopulationScaling={applyPopulationScaling}
       setApplyPopulationScaling={setApplyPopulationScaling}
+      displayDeathsMovingAverage={displayDeathsMovingAverage}
+      setDisplayDeathsMovingAverage={setDisplayDeathsMovingAverage}
     />
   );
 
@@ -179,7 +174,6 @@ const StatsContainer: React.FC<{ settings: Settings }> = ({ settings }) => {
       searchRefinement={searchRefinementComponent}
       graph={graph}
       settingsModal={settingsModal}
-      graphOptions={graphOptionsComponent}
       err={errComponent}
       loading={loading}
     />
