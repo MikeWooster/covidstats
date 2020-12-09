@@ -16,22 +16,24 @@ import {
 } from "recharts";
 import { hexToRgb, rgbToHex } from "../utils/colours";
 import { nullToZero } from "../utils/math";
-import { NormalizedStats } from "./stats";
+import { NormalizedStats, removeDays } from "./stats";
 
 interface props {
-  stats: NormalizedStats;
+  initialStats: NormalizedStats;
   displayDeaths: boolean;
   applyWeighting: boolean;
   applyPopulationScaling: boolean;
   displayDeathsMovingAverage: boolean;
+  daysToDisregard: number | null;
 }
 
 const StatsGraph: React.FC<props> = ({
-  stats,
+  initialStats,
   displayDeaths,
   applyWeighting,
   applyPopulationScaling,
   displayDeathsMovingAverage,
+  daysToDisregard,
 }) => {
   const winWidth =
     window.innerWidth ||
@@ -39,9 +41,12 @@ const StatsGraph: React.FC<props> = ({
     document.body.clientWidth;
   const onMobile = winWidth < 800;
 
+  const stats = removeDays(initialStats, daysToDisregard);
+
   const population = stats.areas
     .map((area) => area.population)
     .reduce((a, b) => a + b, 0);
+
   const statsMovingAv = applyPopulationScaling
     ? calcMovingAverage(
         stats.dates.map((date) => ({
