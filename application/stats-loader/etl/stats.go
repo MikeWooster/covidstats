@@ -70,6 +70,7 @@ func GetLoader(areaType string) Loader {
 		"overview": NationLoader,
 		"nation":   NationLoader,
 		"region":   LocalLoader,
+		"utla":     LocalLoader,
 		"ltla":     LocalLoader,
 	}
 	if l, ok := loaders[areaType]; ok {
