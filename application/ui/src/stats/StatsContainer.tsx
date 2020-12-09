@@ -38,6 +38,7 @@ const StatsContainer: React.FC<{ settings: Settings }> = ({ settings }) => {
   const [displayDeathsMovingAverage, setDisplayDeathsMovingAverage] = useState(
     true
   );
+  const [daysToDisregard, setDaysToDisregard] = useState<number | null>(5);
 
   const postCodeSearchTimeout = useRef<NodeJS.Timeout | undefined>(undefined);
 
@@ -146,11 +147,12 @@ const StatsContainer: React.FC<{ settings: Settings }> = ({ settings }) => {
 
   const graph = (
     <StatsGraph
-      stats={stats}
+      initialStats={stats}
       displayDeaths={areaType !== AreaTypes.postCode}
       applyWeighting={showApplyWeighting && applyWeighting}
       applyPopulationScaling={applyPopulationScaling}
       displayDeathsMovingAverage={displayDeathsMovingAverage}
+      daysToDisregard={daysToDisregard}
     />
   );
 
@@ -165,6 +167,8 @@ const StatsContainer: React.FC<{ settings: Settings }> = ({ settings }) => {
       setApplyPopulationScaling={setApplyPopulationScaling}
       displayDeathsMovingAverage={displayDeathsMovingAverage}
       setDisplayDeathsMovingAverage={setDisplayDeathsMovingAverage}
+      daysToDisregard={daysToDisregard}
+      setDaysToDisregard={setDaysToDisregard}
     />
   );
 

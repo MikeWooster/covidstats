@@ -418,6 +418,32 @@ const formatLoadedStats = (stats: LoadedResponse[]): NormalizedStats => {
   return ns;
 };
 
+export const removeDays = (
+  stats: NormalizedStats,
+  days: number | null
+): NormalizedStats => {
+  if (days === null || days === 0) {
+    return stats;
+  }
+  const ignoreDaysAfter = moment().endOf("day").subtract(days, "day");
+  const filteredStats: NormalizedStats = {
+    stats: {},
+    areas: stats.areas,
+    dates: [],
+  };
+
+  for (let i = 0; i < stats.dates.length; i++) {
+    const date = stats.dates[i];
+    if (date.asMoment.isAfter(ignoreDaysAfter)) {
+      continue;
+    }
+    filteredStats.dates.push(date);
+    date.stats.forEach((s) => (filteredStats.stats[s] = stats.stats[s]));
+  }
+
+  return filteredStats;
+};
+
 const formatStats = (stats: StatsDataResponse[]): NormalizedStats => {
   const ns: NormalizedStats = { stats: {}, areas: [], dates: [] };
   const areas: { [key: string]: Area } = {};

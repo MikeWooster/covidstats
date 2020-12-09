@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Checkbox, Icon, Modal } from "semantic-ui-react";
+import { Button, Checkbox, Icon, Input, Modal } from "semantic-ui-react";
 import InfoPopup from "../utils/InfoPopup";
 
 interface props {
@@ -12,6 +12,8 @@ interface props {
   setApplyPopulationScaling: (v: boolean) => void;
   displayDeathsMovingAverage: boolean;
   setDisplayDeathsMovingAverage: (v: boolean) => void;
+  daysToDisregard: number | null;
+  setDaysToDisregard: (v: number | null) => void;
 }
 
 const SettingsModal: React.FC<props> = ({
@@ -24,6 +26,8 @@ const SettingsModal: React.FC<props> = ({
   setApplyPopulationScaling,
   displayDeathsMovingAverage,
   setDisplayDeathsMovingAverage,
+  daysToDisregard,
+  setDaysToDisregard,
 }) => {
   return (
     <Modal
@@ -89,6 +93,40 @@ const SettingsModal: React.FC<props> = ({
               checked={displayDeathsMovingAverage}
               onChange={() =>
                 setDisplayDeathsMovingAverage(!displayDeathsMovingAverage)
+              }
+            />
+          </div>
+          <div>
+            <Input
+              label="Number of days to ignore"
+              labelPosition="right"
+              value={daysToDisregard}
+              onChange={(e, { value }) => {
+                if (value === "") {
+                  setDaysToDisregard(null);
+                  return;
+                }
+                const days = parseInt(value);
+                if (isNaN(days)) {
+                  return;
+                }
+                setDaysToDisregard(days);
+              }}
+            />
+            <InfoPopup
+              header="Ignoring Days"
+              content={
+                <div>
+                  <p>
+                    Setting this value to a number greater than 0 will remove
+                    the number of daysToDisregard towards the end of the graph.
+                  </p>
+                  <p>
+                    An analysis shows that due to the delay in tests being
+                    analysed and having to be sent to labs, the data from the
+                    last 5 days can not yet be considered complete.
+                  </p>
+                </div>
               }
             />
           </div>
