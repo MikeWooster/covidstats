@@ -9,6 +9,7 @@ import SettingsModal from "./SettingsModal";
 import {
   AreaTypes,
   EMPTY_STATS,
+  getCountyDistricts,
   getLoadedStats,
   getLoadedStatsForPostCode,
   getNations,
@@ -31,6 +32,7 @@ const StatsContainer: React.FC<{ settings: Settings }> = ({ settings }) => {
   const [err, setErr] = useState<Error | null>(null);
   const [nations, setNations] = useState<string[]>([]);
   const [regions, setRegions] = useState<string[]>([]);
+  const [countyDistricts, setCountyDistricts] = useState<string[]>([]);
 
   const [applyWeighting, setApplyWeighting] = useState(false);
   const [applyPopulationScaling, setApplyPopulationScaling] = useState(false);
@@ -83,6 +85,9 @@ const StatsContainer: React.FC<{ settings: Settings }> = ({ settings }) => {
     getAndSetStats(AreaTypes.overview, "");
     getNations().then((nations) => setNations(nations));
     getRegions().then((regions) => setRegions(regions));
+    getCountyDistricts().then((countyDistricts) =>
+      setCountyDistricts(countyDistricts)
+    );
     // eslint-disable-next-line
   }, []);
 
@@ -93,6 +98,7 @@ const StatsContainer: React.FC<{ settings: Settings }> = ({ settings }) => {
       getStats={getAndSetStats}
       nations={nations}
       regions={regions}
+      countyDistricts={countyDistricts}
       setRefinedArea={(v: string) => {
         if (v === "") {
           setStats(EMPTY_STATS);
@@ -124,6 +130,7 @@ const StatsContainer: React.FC<{ settings: Settings }> = ({ settings }) => {
       <AreaRefinementSearch
         nations={nations}
         regions={regions}
+        countyDistricts={countyDistricts}
         areaType={areaType}
         refinedArea={refinedArea}
         setRefinedArea={setRefinedArea}

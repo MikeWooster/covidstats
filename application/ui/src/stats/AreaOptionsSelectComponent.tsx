@@ -5,6 +5,7 @@ import { AreaTypes } from "./stats";
 interface props {
   nations: string[];
   regions: string[];
+  countyDistricts: string[];
   areaType: AreaTypes;
   setAreaType: (v: AreaTypes) => void;
   setRefinedArea: (v: string) => void;
@@ -14,6 +15,7 @@ interface props {
 const AreaOptionsSelect: React.FC<props> = ({
   nations,
   regions,
+  countyDistricts,
   areaType,
   setAreaType,
   setRefinedArea,
@@ -34,6 +36,11 @@ const AreaOptionsSelect: React.FC<props> = ({
       key: AreaTypes.region,
       text: "Region",
       value: AreaTypes.region,
+    },
+    {
+      key: AreaTypes.countyDistrict,
+      text: "County/District",
+      value: AreaTypes.countyDistrict,
     },
     {
       key: AreaTypes.postCode,
@@ -63,6 +70,11 @@ const AreaOptionsSelect: React.FC<props> = ({
               const defaultRegion = regions[0];
               setRefinedArea(defaultRegion);
               getStats(value, defaultRegion);
+              break;
+            case AreaTypes.countyDistrict:
+              const defaultCountyDistrict = countyDistricts[0];
+              setRefinedArea(defaultCountyDistrict);
+              getStats(value, defaultCountyDistrict);
               break;
             case AreaTypes.postCode:
               setRefinedArea("");

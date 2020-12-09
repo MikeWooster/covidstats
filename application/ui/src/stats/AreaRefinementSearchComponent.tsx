@@ -5,6 +5,7 @@ import { AreaTypes } from "./stats";
 interface props {
   nations: string[];
   regions: string[];
+  countyDistricts: string[];
   areaType: AreaTypes;
   refinedArea: string;
   setRefinedArea: (v: string) => void;
@@ -14,6 +15,7 @@ interface props {
 const AreaRefinementSearch: React.FC<props> = ({
   nations,
   regions,
+  countyDistricts,
   areaType,
   refinedArea,
   setRefinedArea,
@@ -44,6 +46,13 @@ const AreaRefinementSearch: React.FC<props> = ({
         value: region,
       }));
       break;
+    case AreaTypes.countyDistrict:
+      searchOptions = countyDistricts.map((countyDistrict) => ({
+        key: countyDistrict,
+        text: countyDistrict,
+        value: countyDistrict,
+      }));
+      break;
   }
 
   return (
@@ -51,6 +60,7 @@ const AreaRefinementSearch: React.FC<props> = ({
       <label htmlFor="areaRefinementSearchInput">Refine results </label>
       <Dropdown
         id="areaRefinementSearchInput"
+        search={areaType === AreaTypes.countyDistrict}
         inline
         disabled={disabled}
         options={searchOptions}
