@@ -10,6 +10,8 @@ interface props {
   setApplyWeighting: (v: boolean) => void;
   applyPopulationScaling: boolean;
   setApplyPopulationScaling: (v: boolean) => void;
+  displayDeathsMovingAverage: boolean;
+  setDisplayDeathsMovingAverage: (v: boolean) => void;
 }
 
 const SettingsModal: React.FC<props> = ({
@@ -20,6 +22,8 @@ const SettingsModal: React.FC<props> = ({
   setApplyWeighting,
   applyPopulationScaling,
   setApplyPopulationScaling,
+  displayDeathsMovingAverage,
+  setDisplayDeathsMovingAverage,
 }) => {
   return (
     <Modal
@@ -75,6 +79,16 @@ const SettingsModal: React.FC<props> = ({
               checked={applyPopulationScaling}
               onChange={() =>
                 setApplyPopulationScaling(!applyPopulationScaling)
+              }
+            />
+          </div>
+          <div>
+            <Checkbox
+              toggle
+              label="Display deaths 7 day moving average."
+              checked={displayDeathsMovingAverage}
+              onChange={() =>
+                setDisplayDeathsMovingAverage(!displayDeathsMovingAverage)
               }
             />
           </div>

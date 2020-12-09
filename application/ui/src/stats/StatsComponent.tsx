@@ -6,7 +6,6 @@ interface props {
   searchRefinement: React.ReactElement;
   graph: React.ReactElement;
   settingsModal: React.ReactElement;
-  graphOptions: React.ReactElement;
   err: React.ReactElement | null;
   loading: boolean;
 }
@@ -16,7 +15,6 @@ const StatsComponent: React.FC<props> = ({
   searchRefinement,
   graph,
   settingsModal,
-  graphOptions,
   err,
   loading,
 }) => {

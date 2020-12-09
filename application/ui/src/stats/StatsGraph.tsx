@@ -23,6 +23,7 @@ interface props {
   displayDeaths: boolean;
   applyWeighting: boolean;
   applyPopulationScaling: boolean;
+  displayDeathsMovingAverage: boolean;
 }
 
 const StatsGraph: React.FC<props> = ({
@@ -30,6 +31,7 @@ const StatsGraph: React.FC<props> = ({
   displayDeaths,
   applyWeighting,
   applyPopulationScaling,
+  displayDeathsMovingAverage,
 }) => {
   const winWidth =
     window.innerWidth ||
@@ -40,7 +42,7 @@ const StatsGraph: React.FC<props> = ({
   const population = stats.areas
     .map((area) => area.population)
     .reduce((a, b) => a + b, 0);
-  const movingAverage = applyPopulationScaling
+  const statsMovingAv = applyPopulationScaling
     ? calcMovingAverage(
         stats.dates.map((date) => ({
           date: date.asMoment,
@@ -55,6 +57,21 @@ const StatsGraph: React.FC<props> = ({
         })),
         7
       );
+  const deathsMovingAv = applyPopulationScaling
+    ? calcMovingAverage(
+        stats.dates.map((date) => ({
+          date: date.asMoment,
+          val: scaleByPopulation(date.totals.totalDeaths, population, 1),
+        })),
+        7
+      )
+    : calcMovingAverage(
+        stats.dates.map((date) => ({
+          date: date.asMoment,
+          val: date.totals.totalDeaths,
+        })),
+        7
+      );
 
   // Sum up the total number of tests taken in all areas
   const maxTests = stats.areas
@@ -66,7 +83,9 @@ const StatsGraph: React.FC<props> = ({
     [key: string]: number | null;
   }[] = stats.dates.map((date, i) => {
     const input: { [key: string]: number | null } = {};
-    input.casesMA = movingAverage[i];
+    input.casesMA = statsMovingAv[i];
+    input.deathsMA = deathsMovingAv[i];
+
     const weightedInput = calcWeightedStat(
       date.totals.totalCases,
       date.totals.totalTests,
@@ -185,6 +204,7 @@ const StatsGraph: React.FC<props> = ({
         />
         )
         {displayDeaths &&
+          !displayDeathsMovingAverage &&
           stats.areas.map((area) => (
             <Line
               key={`${area.areaCode}Deaths`}
@@ -197,6 +217,17 @@ const StatsGraph: React.FC<props> = ({
               strokeWidth="2"
             />
           ))}
+        {displayDeaths && displayDeathsMovingAverage && (
+          <Line
+            yAxisId="right"
+            type="monotone"
+            dataKey={"deathsMA"}
+            stroke="#dc0000de"
+            dot={false}
+            name="Moving Average (Deaths)"
+            strokeWidth="2"
+          />
+        )}
         {applyWeighting && (
           <Line
             yAxisId="left"
