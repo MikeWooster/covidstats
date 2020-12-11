@@ -10,3 +10,7 @@ Website to display stats about Covid cases/deaths in the UK.
 * Ability to scale cases/deaths per 100,000.
 * Display a "worst-case" cases stat by extrapolating the number 
 of tests to cases ratio backwards based upon the day of most tests.
+
+## Infrastructure
+
+![system overview](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/MikeWooster/covidstats/master/readme-pages/diagram.puml)
