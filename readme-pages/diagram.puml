@@ -1,0 +1,37 @@
+@startuml Basic Usage - AWS IoT Rules Engine
+
+!define AWSPuml https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/master/dist
+!includeurl AWSPuml/AWSCommon.puml
+'!includeurl AWSPuml/AWSSimplified.puml
+!includeurl AWSPuml/ApplicationIntegration/SQS.puml
+!includeurl AWSPuml/Storage/SimpleStorageServiceS3.puml
+!includeurl AWSPuml/NetworkingAndContentDelivery/CloudFront.puml
+!includeurl AWSPuml/ManagementAndGovernance/CloudWatchEventTimeBased.puml
+!includeurl AWSPuml/Compute/Lambda.puml
+
+left to right direction
+
+frame "web" {
+  CloudFront(cdn, "CDN", "distribution")
+  SimpleStorageServiceS3(webcontent, "Web Content", "S3 Standard")
+}
+
+frame "scheduler" {
+  CloudWatchEventTimeBased(event, "CloudWatch Event", "cron")
+  Lambda(schedulerLambda, "Scheduler", "schedule stats loading")
+}
+
+frame "etl" {
+  SQS(etlQueue, "ETL Queue", "stats requests")
+  SQS(etlDLQueue, "Deadletter Queue", "failed requests")
+  Lambda(etlLambda, "Stats Loader", "loads/transforms stats")
+}
+
+webcontent --> cdn
+event --> schedulerLambda
+schedulerLambda --> etlQueue
+etlQueue --> etlDLQueue
+etlDLQueue --> etlLambda
+etlLambda --> webcontent
+
+@enduml
