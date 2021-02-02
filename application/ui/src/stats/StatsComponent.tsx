@@ -6,6 +6,7 @@ interface props {
   searchRefinement: React.ReactElement;
   graph: React.ReactElement;
   settingsModal: React.ReactElement;
+  alert: React.ReactElement;
   err: React.ReactElement | null;
   loading: boolean;
 }
@@ -15,6 +16,7 @@ const StatsComponent: React.FC<props> = ({
   searchRefinement,
   graph,
   settingsModal,
+  alert,
   err,
   loading,
 }) => {
@@ -35,12 +37,13 @@ const StatsComponent: React.FC<props> = ({
       <Segment basic>
         <Grid columns="equal">
           <Grid.Row>
-            <Grid.Column width={14}>
+            <Grid.Column width={10}>
               {areaOptions}
               {searchRefinement}
               {err && err}
               <Loader active={loading} inline />
             </Grid.Column>
+            <Grid.Column width={4}>{alert}</Grid.Column>
             <Grid.Column width={2}>{settingsModal}</Grid.Column>
           </Grid.Row>
         </Grid>
