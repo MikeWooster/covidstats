@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Segment } from "semantic-ui-react";
-import { Settings } from "../settings";
+import React, {useEffect, useRef, useState} from "react";
+import {Segment} from "semantic-ui-react";
+import {Settings} from "../settings";
 import AreaOptionsSelect from "./AreaOptionsSelectComponent";
 import AreaRefinementSearch from "./AreaRefinementSearchComponent";
 import PostCodeSearch from "./PostCodeSearchComponent";
@@ -19,8 +19,9 @@ import {
 } from "./stats";
 import StatsComponent from "./StatsComponent";
 import StatsGraph from "./StatsGraph";
+import AlertComponent from "./AlertComponent";
 
-const StatsContainer: React.FC<{ settings: Settings }> = ({ settings }) => {
+const StatsContainer: React.FC<{ settings: Settings }> = ({settings}) => {
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState<NormalizedStats>(EMPTY_STATS);
   const [areaType, setAreaType] = useState(AreaTypes.overview);
@@ -47,14 +48,14 @@ const StatsContainer: React.FC<{ settings: Settings }> = ({ settings }) => {
     setErr(null);
     const statsGetter = settings.mode === "prod" ? getLoadedStats : getStats;
     statsGetter(areaType, refinedArea)
-      .then((stats) => {
-        setLoading(false);
-        setStats(stats);
-      })
-      .catch((err) => {
-        setErr(err);
-        setLoading(false);
-      });
+    .then((stats) => {
+      setLoading(false);
+      setStats(stats);
+    })
+    .catch((err) => {
+      setErr(err);
+      setLoading(false);
+    });
   };
 
   const getAndSetStatsForPostCode = (postCode: string, radius: number) => {
@@ -68,14 +69,14 @@ const StatsContainer: React.FC<{ settings: Settings }> = ({ settings }) => {
         ? getLoadedStatsForPostCode
         : getStatsForPostCode;
     statsGetter(postCode, radius)
-      .then((stats) => {
-        setLoading(false);
-        setStats(stats);
-      })
-      .catch((err) => {
-        setErr(err);
-        setLoading(false);
-      });
+    .then((stats) => {
+      setLoading(false);
+      setStats(stats);
+    })
+    .catch((err) => {
+      setErr(err);
+      setLoading(false);
+    });
   };
 
   const errComponent = err ? (
@@ -172,12 +173,15 @@ const StatsContainer: React.FC<{ settings: Settings }> = ({ settings }) => {
     />
   );
 
+  const alertComponent = <AlertComponent stats={stats} daysToDisregard={daysToDisregard}/>
+
   return (
     <StatsComponent
       areaOptions={areaOptionsComponent}
       searchRefinement={searchRefinementComponent}
       graph={graph}
       settingsModal={settingsModal}
+      alert={alertComponent}
       err={errComponent}
       loading={loading}
     />
