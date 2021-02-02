@@ -98,8 +98,7 @@ const SettingsModal: React.FC<props> = ({
           </div>
           <div>
             <Input
-              label="Number of days to ignore"
-              labelPosition="right"
+              style={{width:50, textAlign: "center"}}
               value={daysToDisregard}
               onChange={(e, { value }) => {
                 if (value === "") {
@@ -113,6 +112,7 @@ const SettingsModal: React.FC<props> = ({
                 setDaysToDisregard(days);
               }}
             />
+            <label style={{paddingLeft: 15}}>Number of days to ignore.</label>
             <InfoPopup
               header="Ignoring Days"
               content={
