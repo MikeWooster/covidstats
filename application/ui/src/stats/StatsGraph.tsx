@@ -5,6 +5,7 @@ import {
   Brush,
   CartesianGrid,
   ComposedChart,
+  Label,
   Legend,
   Line,
   LineChart,
@@ -250,10 +251,13 @@ const StatsGraph: React.FC<props> = ({
             yAxisId="left"
             y={numLatestCases}
             isFront={true}
-            label={`Latest (${lastDate}): ${numLatestCases}`}
             stroke="red"
             strokeDasharray="3 3"
-          />
+          >
+            <Label position="top" fill={"red"}>
+              {`Latest (${lastDate}): ${numLatestCases}`}
+            </Label>
+          </ReferenceLine>
         )}
         <Brush dataKey="date" tickFormatter={tickFormatter}>
           <LineChart compact={false}>
