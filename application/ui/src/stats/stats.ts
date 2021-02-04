@@ -1,13 +1,13 @@
 import moment, { Moment } from "moment";
 import { nullToZero } from "../utils/math";
-import { getNeighbouringLAs } from "./geo";
+import { getNeighbouringLAs } from "../utils/geo";
 import {
   fetchLoadedStats,
   fetchLoadedStatsForLTLAs,
   LoadedResponse,
-} from "./loadedStatsAPI";
-import { geocodePostCode } from "./postCodeAPI";
-import { fetchStats, fetchStatsForLTLAs, StatsDataResponse } from "./statsAPI";
+} from "../api/loadedStatsAPI";
+import { geocodePostCode } from "../api/postCodeAPI";
+import { fetchStats, fetchStatsForLTLAs, StatsDataResponse } from "../api/statsAPI";
 
 export enum AreaTypes {
   overview = "overview",

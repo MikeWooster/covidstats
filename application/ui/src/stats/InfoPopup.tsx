@@ -9,10 +9,10 @@ interface props {
 const InfoPopup: React.FC<props> = ({ header, content }) => {
   return (
     <Popup
-      header={header}
-      content={content}
+      data-testid="info-popup"
       trigger={
         <Icon
+          data-testid="popup-trigger"
           name="info"
           circular
           color="blue"
@@ -21,7 +21,10 @@ const InfoPopup: React.FC<props> = ({ header, content }) => {
         />
       }
     >
-      {content}
+      <div data-testid="popup-content">
+        <h4>{header}</h4>
+        {content}
+      </div>
     </Popup>
   );
 };

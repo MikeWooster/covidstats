@@ -1,4 +1,4 @@
-import { AreaTypes } from "./stats";
+import { AreaTypes } from "../stats/stats";
 
 // Simple cache to save repeated lookups.
 const cache: { [key: string]: StatsResponse } = {};

@@ -1,6 +1,6 @@
 import React from "react";
 import { Input } from "semantic-ui-react";
-import InfoPopup from "../utils/InfoPopup";
+import InfoPopup from "./InfoPopup";
 
 interface props {
   postCode: string;

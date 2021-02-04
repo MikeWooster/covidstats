@@ -1,6 +1,6 @@
 import React from "react";
 import { Button, Checkbox, Icon, Input, Modal } from "semantic-ui-react";
-import InfoPopup from "../utils/InfoPopup";
+import InfoPopup from "./InfoPopup";
 
 interface props {
   setModalOpen: (v: boolean) => void;

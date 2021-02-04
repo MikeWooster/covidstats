@@ -60,6 +60,7 @@ const AreaRefinementSearch: React.FC<props> = ({
       <label htmlFor="areaRefinementSearchInput">Refine results </label>
       <Dropdown
         id="areaRefinementSearchInput"
+        data-testid="areaRefinementSearchInput"
         search={areaType === AreaTypes.countyDistrict}
         inline
         disabled={disabled}
