@@ -55,6 +55,7 @@ const AreaOptionsSelect: React.FC<props> = ({
         id="areaTypeSelectInput"
         inline
         options={areaOptions}
+        data-testid={"areaTypeSelectInput"}
         onChange={(e, { value }) => {
           setAreaType(value as AreaTypes);
           switch (value) {

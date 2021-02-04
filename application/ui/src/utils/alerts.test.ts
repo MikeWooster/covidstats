@@ -1,12 +1,12 @@
-import { calculateCasesRatio } from "./AlertComponent";
 import moment from "moment";
-import { NormalizedStats } from "./stats";
-
+import { NormalizedStats } from "../stats/stats";
+import { calculateCasesRatio } from "./alerts";
 
 test("calculateCasesRatio", () => {
-  const d1 = moment().subtract(3, "days")
-  const d2 = moment().subtract(2, "days")
-  const d3 = moment().subtract(1, "days")
+  const d1 = moment().subtract(3, "days");
+  const d2 = moment().subtract(2, "days");
+  const d3 = moment().subtract(1, "days");
+
   const stats: NormalizedStats = {
     stats: {
       "a": {
@@ -70,6 +70,7 @@ test("calculateCasesRatio", () => {
       },
     ],
   };
+
   const got = calculateCasesRatio(stats, 3, 0);
-  expect(got).toEqual({casesRatio: 2, activeCases: 50000, population: 100000})
+  expect(got).toEqual({ casesRatio: 2, activeCases: 50000, population: 100000 });
 });
