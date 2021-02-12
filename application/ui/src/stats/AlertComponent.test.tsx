@@ -13,7 +13,7 @@ test.each([
   { cases: 1, population: 1000, message: "Alert: Medium" },
   { cases: 1, population: 1001, message: "Alert: Low" },
   { cases: 1, population: 10000, message: "Alert: Low" },
-  { cases: 1, population: 10001, message: "Alert: Low" },
+  { cases: 1, population: 10001, message: "Alert: Very Low" },
 ])("AlertComponent renders correct alert message", ({ cases, population, message }) => {
     const d1 = moment().subtract(3, "days");
     const thisStats: NormalizedStats = {

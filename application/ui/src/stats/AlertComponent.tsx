@@ -34,20 +34,23 @@ const AlertComponent: React.FC<props> = ({ stats, daysToDisregard }) => {
         The following criteria have been considered to construct the alert categories:
         <ul>
           <li>
-            Very High: Greater than 1 in 100 people have covid in the last 14 days. This is the approx number of
+            Very High: More than 1:100 people have covid in the last 14 days. This is the approx number of
             people you may pass on a typical walk near a town.
           </li>
           <li>
-            High: Greater than 1 in 300 people have Covid in the last 14 days. This is the approx number of people you
+            High: 1:100 to 1:300 people have Covid in the last 14 days. This is the approx number of people you
             might pass when you visit a supermarket.
           </li>
           <li>
-            Medium: Greater than 1 in 1,000 people have Covid in the last 14 days. This is the approx number of people
+            Medium: 1:300 to 1:1,000 people have Covid in the last 14 days. This is the approx number of people
             you may be exposed to at a small/medium club/bar on a night out.
           </li>
           <li>
-            Low: Greater than 1 in 10,000 people have Covid in the last 14 days. This is the approx number of people you
+            Low: 1:1,000 to 1:10,000 people have Covid in the last 14 days. This is the approx number of people you
             may be exposed to at a large social event, e.g. a concert.
+          </li>
+          <li>
+            Low: Less than 1:10,000 people have Covid in the last 14 days.
           </li>
         </ul>
       </p>
@@ -65,8 +68,10 @@ const getAlert = (casesRatio: number): React.ReactElement => {
     return <Message style={style} error>Alert: High</Message>;
   } else if (casesRatio <= 1000) {
     return <Message style={style} warning>Alert: Medium</Message>;
+  } else if (casesRatio <= 10000) {
+    return <Message style={style} info>Alert: Low</Message>;
   }
-  return <Message style={style} info>Alert: Low</Message>;
+  return <Message style={style} info>Alert: Very Low</Message>;
 };
 
 export default AlertComponent;
