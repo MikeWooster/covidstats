@@ -11,7 +11,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
-// Uploader defines the interface to upload stats to storage
+// Uploader is an interface that represents the ability
+// to upload stats to storage.
 type Uploader interface {
 	Upload(stats AreaStats) error
 }

@@ -25,6 +25,7 @@ func HandleRequest(ctx context.Context, event events.CloudWatchEvent) {
 	messenger.PublishMessages(AreaCodes)
 }
 
+// NewMessenger creates a new connection to a queue.
 func NewMessenger() *SQS {
 	url := os.Getenv("QUEUE_URL")
 	sess := session.Must(session.NewSession())
@@ -34,11 +35,14 @@ func NewMessenger() *SQS {
 	}
 }
 
+// SQS connects to a aws sqs queue.
 type SQS struct {
 	url *string
 	sqs *sqs.SQS
 }
 
+// PublishMessages puts area codes onto the queue for processing
+// in batches.
 func (s *SQS) PublishMessages(areas []AreaInfo) error {
 	stringBodies, err := getStringBodies(areas)
 	if err != nil {
@@ -54,8 +58,15 @@ func (s *SQS) PublishMessages(areas []AreaInfo) error {
 }
 
 func getStringBodies(areas []AreaInfo) ([][]string, error) {
+	// Calculate the number of batches required to publish all messages.
 	numBatches := (len(areas)-1)/10 + 1
+
+	// create a nested slice of the sqs message bodies.
+	// each inner slice contains up to 10 message bodies
+	// and the outer slice contains as many batches as needed
+	// to send all messages.
 	var allBodies [][]string
+
 	var area *AreaInfo
 
 	b := 0
