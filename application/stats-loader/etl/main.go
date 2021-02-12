@@ -60,7 +60,7 @@ func LoadMessage(m events.SQSMessage) AreaInfo {
 	return area
 }
 
-// MarshallFromEvent marshalls the event message body into the supplied struct
+// MarshallFromEvent marshals the event message body into the supplied struct
 func MarshallFromEvent(m events.SQSMessage, c interface{}) error {
 	return json.Unmarshal([]byte(m.Body), c)
 }

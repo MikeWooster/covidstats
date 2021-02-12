@@ -12,14 +12,19 @@ import (
 
 const baseURL = "https://api.coronavirus.data.gov.uk"
 
+// IHTTP is an interface representing the ability to
+// issue an HTTP request and decode a JSON response into
+// a given data structure.
 type IHTTP interface {
 	GetJSON(url string, data interface{}) error
 }
 
+// HTTP implements the IHTTP interface to issue requests to the gov api.
 type HTTP struct {
 	http *http.Client
 }
 
+// GetJSON requests data from the specified url decoding to the supplied structure.
 func (c *HTTP) GetJSON(url string, data interface{}) error {
 	log.Printf("Fetching URL = %v", url)
 	resp, getErr := c.http.Get(url)
@@ -44,10 +49,12 @@ func (c *HTTP) GetJSON(url string, data interface{}) error {
 	return nil
 }
 
+// StatsAPI contains methods to get the stats for a given area.
 type StatsAPI struct {
 	http IHTTP
 }
 
+// NewStatsAPI creates a StatsAPI.
 func NewStatsAPI() *StatsAPI {
 	api := &StatsAPI{
 		http: &HTTP{http: &http.Client{Timeout: 2 * time.Second}},
@@ -55,6 +62,7 @@ func NewStatsAPI() *StatsAPI {
 	return api
 }
 
+// DataResponse represents the response to the gov api for a single stat.
 type DataResponse struct {
 	AreaType                     string   `json:"areaType"`
 	AreaName                     string   `json:"areaName"`
@@ -70,6 +78,7 @@ type DataResponse struct {
 	CumCasesByPublishDateRate    *float32 `json:"cumCasesByPublishDateRate"`
 }
 
+// APIResponse represents the response to the gov api.
 type APIResponse struct {
 	Data         []DataResponse `json:"data"`
 	Length       int            `json:"length"`
@@ -82,7 +91,7 @@ type APIResponse struct {
 	} `json:"pagination"`
 }
 
-// FetchStats returns the stats from the gov api
+// FetchStats returns the stats from the gov api.
 func (s *StatsAPI) FetchStats(area AreaInfo) ([]DataResponse, error) {
 	url := generateURL(area)
 	r, err := s.paginate(&url)
@@ -98,6 +107,7 @@ func generateURL(area AreaInfo) string {
 	return "/v1/data?" + encodeParams(structure, filters)
 }
 
+// request multiple pages from the gov api.
 func (s *StatsAPI) paginate(url *string) ([]DataResponse, error) {
 	var r []DataResponse
 	for url != nil {

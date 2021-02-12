@@ -1,12 +1,13 @@
 package main
 
-// AreaInfo holds codes and types to look up
+// AreaInfo holds codes and types to look up.
 type AreaInfo struct {
 	AreaCode string `json:"areaCode"`
 	AreaType string `json:"areaType"`
 }
 
-// AreaCodes provides access to all area codes in the stats api that we need load stats for
+// AreaCodes provides access to all area codes in the stats
+// api that we need load stats for.
 var AreaCodes = []AreaInfo{
 	{AreaCode: "K02000001", AreaType: "overview"},
 	{AreaCode: "E92000001", AreaType: "nation"},
