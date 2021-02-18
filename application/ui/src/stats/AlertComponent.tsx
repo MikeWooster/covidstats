@@ -5,7 +5,7 @@ import { calculateCasesRatio } from "../utils/alerts";
 
 interface props {
   stats: NormalizedStats;
-  daysToDisregard: number | null
+  daysToDisregard: number | null;
 }
 
 /*
@@ -21,57 +21,90 @@ interface props {
 const AlertComponent: React.FC<props> = ({ stats, daysToDisregard }) => {
   const totalActiveCases = calculateCasesRatio(stats, 14, daysToDisregard || 0);
   const alert = getAlert(totalActiveCases.casesRatio);
-  return <Popup trigger={alert} position={"bottom left"}>
-    <div>
-      <h4>1 in {Math.round(totalActiveCases.casesRatio)} people are considered to have Covid in the search area.</h4>
-      <p>
-        <ul>
-          <li>Population: {totalActiveCases.population.toLocaleString()}</li>
-          <li>Total Cases: {totalActiveCases.activeCases.toLocaleString()}</li>
-        </ul>
-      </p>
-      <p>
-        The following criteria have been considered to construct the alert categories:
-        <ul>
-          <li>
-            Very High: More than 1:100 people have covid in the last 14 days. This is the approx number of
-            people you may pass on a typical walk near a town.
-          </li>
-          <li>
-            High: 1:100 to 1:300 people have Covid in the last 14 days. This is the approx number of people you
-            might pass when you visit a supermarket.
-          </li>
-          <li>
-            Medium: 1:300 to 1:1,000 people have Covid in the last 14 days. This is the approx number of people
-            you may be exposed to at a small/medium club/bar on a night out.
-          </li>
-          <li>
-            Low: 1:1,000 to 1:10,000 people have Covid in the last 14 days. This is the approx number of people you
-            may be exposed to at a large social event, e.g. a concert.
-          </li>
-          <li>
-            Low: Less than 1:10,000 people have Covid in the last 14 days.
-          </li>
-        </ul>
-      </p>
-    </div>
-  </Popup>;
+  return (
+    <Popup trigger={alert} position={"bottom left"}>
+      <div>
+        <h4>
+          1 in {Math.round(totalActiveCases.casesRatio)} people are considered
+          to have Covid in the search area.
+        </h4>
+        <p>
+          <ul>
+            <li>Population: {totalActiveCases.population.toLocaleString()}</li>
+            <li>
+              Total Cases: {totalActiveCases.activeCases.toLocaleString()}
+            </li>
+          </ul>
+        </p>
+        <p>
+          The following criteria have been considered to construct the alert
+          categories:
+          <ul>
+            <li>
+              Very High: More than 1:100 people have covid in the last 14 days.
+              This is the approx number of people you may pass on a typical walk
+              near a town.
+            </li>
+            <li>
+              High: 1:100 to 1:300 people have Covid in the last 14 days. This
+              is the approx number of people you might pass when you visit a
+              supermarket.
+            </li>
+            <li>
+              Medium: 1:300 to 1:1,000 people have Covid in the last 14 days.
+              This is the approx number of people you may be exposed to at a
+              small/medium club/bar on a night out.
+            </li>
+            <li>
+              Low: 1:1,000 to 1:10,000 people have Covid in the last 14 days.
+              This is the approx number of people you may be exposed to at a
+              large social event, e.g. a concert.
+            </li>
+            <li>
+              Very Low: Less than 1:10,000 people have Covid in the last 14
+              days.
+            </li>
+          </ul>
+        </p>
+      </div>
+    </Popup>
+  );
 };
 
 const getAlert = (casesRatio: number): React.ReactElement => {
   const style = { textAlign: "center", paddingLeft: 0, paddingRight: 0 };
   if (casesRatio === 0) {
-    return <div></div>;
+    return <div />;
   } else if (casesRatio <= 100) {
-    return <Message style={style} error>Alert: Very High</Message>;
+    return (
+      <Message style={style} error>
+        Alert: Very High
+      </Message>
+    );
   } else if (casesRatio <= 300) {
-    return <Message style={style} error>Alert: High</Message>;
+    return (
+      <Message style={style} error>
+        Alert: High
+      </Message>
+    );
   } else if (casesRatio <= 1000) {
-    return <Message style={style} warning>Alert: Medium</Message>;
+    return (
+      <Message style={style} warning>
+        Alert: Medium
+      </Message>
+    );
   } else if (casesRatio <= 10000) {
-    return <Message style={style} info>Alert: Low</Message>;
+    return (
+      <Message style={style} info>
+        Alert: Low
+      </Message>
+    );
   }
-  return <Message style={style} info>Alert: Very Low</Message>;
+  return (
+    <Message style={style} info>
+      Alert: Very Low
+    </Message>
+  );
 };
 
 export default AlertComponent;
